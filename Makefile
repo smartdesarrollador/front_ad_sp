@@ -1,0 +1,25 @@
+.PHONY: dev build preview lint format typecheck test install
+
+dev:
+	npm run dev
+
+build:
+	npm run build
+
+preview:
+	npm run preview
+
+lint:
+	npm run lint
+
+format:
+	npm run format
+
+typecheck:
+	npm run typecheck
+
+test:
+	npm run test
+
+install:
+	npm install
