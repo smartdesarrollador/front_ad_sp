@@ -27,8 +27,8 @@ describe('apiClient interceptors', () => {
       .replyOnce(200, { ok: true })
 
     mockPublic
-      .onPost('/auth/token/refresh/')
-      .replyOnce(200, { access: 'new-access-token' })
+      .onPost('/auth/refresh-token')
+      .replyOnce(200, { access_token: 'new-access-token', refresh_token: 'new-refresh-token' })
 
     localStorage.setItem('refreshToken', 'valid-refresh-token')
 
@@ -36,6 +36,7 @@ describe('apiClient interceptors', () => {
 
     expect(response.data).toEqual({ ok: true })
     expect(useAuthStore.getState().accessToken).toBe('new-access-token')
+    expect(localStorage.getItem('refreshToken')).toBe('new-refresh-token')
 
     mockApi.restore()
     mockPublic.restore()

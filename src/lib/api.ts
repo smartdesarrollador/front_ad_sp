@@ -81,13 +81,15 @@ apiClient.interceptors.response.use(
     }
 
     try {
-      const { data } = await publicClient.post<{ access: string }>('/auth/token/refresh/', {
-        refresh,
-      })
-      useAuthStore.getState().setAccessToken(data.access)
-      processQueue(null, data.access)
+      const { data } = await publicClient.post<{ access_token: string; refresh_token: string }>(
+        '/auth/refresh-token',
+        { refresh_token: refresh },
+      )
+      useAuthStore.getState().setAccessToken(data.access_token)
+      localStorage.setItem('refreshToken', data.refresh_token)
+      processQueue(null, data.access_token)
       orig.headers = orig.headers ?? {}
-      orig.headers['Authorization'] = `Bearer ${data.access}`
+      orig.headers['Authorization'] = `Bearer ${data.access_token}`
       return apiClient(orig)
     } catch (err) {
       processQueue(err, null)

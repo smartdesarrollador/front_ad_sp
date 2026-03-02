@@ -1,14 +1,6 @@
-import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom'
+import { createBrowserRouter } from 'react-router-dom'
 import App from '@/App'
-import { useAuthStore } from '@/store/authStore'
-
-function AuthGuard() {
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
-  }
-  return <Outlet />
-}
+import ProtectedRoute from '@/features/auth/components/ProtectedRoute'
 
 export const router = createBrowserRouter([
   {
@@ -16,17 +8,39 @@ export const router = createBrowserRouter([
     element: <App />,
     children: [
       {
-        element: <AuthGuard />,
+        element: <ProtectedRoute />,
         children: [
           {
             index: true,
-            lazy: () => import('@/pages/DashboardPage').then((m) => ({ Component: m.default })),
+            lazy: () =>
+              import('@/pages/DashboardPage').then((m) => ({ Component: m.default })),
           },
         ],
       },
       {
         path: 'login',
-        lazy: () => import('@/pages/LoginPage').then((m) => ({ Component: m.default })),
+        lazy: () =>
+          import('@/features/auth/LoginPage').then((m) => ({ Component: m.default })),
+      },
+      {
+        path: 'register',
+        lazy: () =>
+          import('@/features/auth/RegisterPage').then((m) => ({ Component: m.default })),
+      },
+      {
+        path: 'forgot-password',
+        lazy: () =>
+          import('@/features/auth/ForgotPasswordPage').then((m) => ({ Component: m.default })),
+      },
+      {
+        path: 'reset-password',
+        lazy: () =>
+          import('@/features/auth/ResetPasswordPage').then((m) => ({ Component: m.default })),
+      },
+      {
+        path: 'auth/google/callback',
+        lazy: () =>
+          import('@/features/auth/GoogleCallbackPage').then((m) => ({ Component: m.default })),
       },
     ],
   },

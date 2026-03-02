@@ -13,13 +13,44 @@ export interface User {
   createdAt: string
 }
 
+export interface Tenant {
+  id: string
+  name: string
+  subdomain: string
+  plan: string
+}
+
 export interface LoginRequest {
   email: string
   password: string
 }
 
 export interface LoginResponse {
-  access: string
-  refresh: string
+  access_token: string
+  refresh_token: string
   user: User
+  tenant: Tenant
+}
+
+export interface MFALoginResponse {
+  mfa_required: true
+  mfa_token: string
+}
+
+export interface RegisterRequest {
+  name: string
+  email: string
+  organizationName: string
+  password: string
+  confirmPassword: string
+  acceptTerms: boolean
+}
+
+export interface ForgotPasswordRequest {
+  email: string
+}
+
+export interface ResetPasswordRequest {
+  token: string
+  password: string
 }
