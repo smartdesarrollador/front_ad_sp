@@ -1,0 +1,25 @@
+version: '3.9'
+
+# ─────────────────────────────────────────────────────────────
+# Production docker-compose override
+# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# ─────────────────────────────────────────────────────────────
+
+services:
+  nginx:
+    build:
+      context: .
+      target: prod
+      args:
+        VITE_API_URL: ${VITE_API_URL:-/api}
+        VITE_APP_NAME: ${VITE_APP_NAME:-"RBAC Admin Panel"}
+        VITE_APP_VERSION: ${VITE_APP_VERSION:-1.0.0}
+    container_name: rbac_admin_nginx
+    # Sin ports: — NPM accede directamente por la red global
+    networks:
+      - default
+      - global
+
+networks:
+  global:
+    external: true
