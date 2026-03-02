@@ -1,0 +1,27 @@
+{
+  "menu": {
+    "dashboard": "Dashboard",
+    "users": "Usuarios",
+    "clients": "Clientes",
+    "analytics": "Analytics",
+    "roles": "Roles",
+    "permissions": "Permisos",
+    "subscription": "Suscripción",
+    "promotions": "Promociones",
+    "audit": "Auditoría",
+    "settings": "Configuración",
+    "reports": "Reportes",
+    "notifications": "Notificaciones",
+    "billing": "Facturación"
+  },
+  "upgrade": {
+    "title": "¿Necesitas más usuarios?",
+    "description": "Actualiza a Enterprise para usuarios ilimitados",
+    "button": "Ver planes"
+  },
+  "sections": {
+    "main": "Principal",
+    "management": "Gestión",
+    "system": "Sistema"
+  }
+}

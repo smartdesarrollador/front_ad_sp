@@ -1,0 +1,27 @@
+{
+  "menu": {
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "clients": "Clients",
+    "analytics": "Analytics",
+    "roles": "Roles",
+    "permissions": "Permissions",
+    "subscription": "Subscription",
+    "promotions": "Promotions",
+    "audit": "Audit",
+    "settings": "Settings",
+    "reports": "Reports",
+    "notifications": "Notifications",
+    "billing": "Billing"
+  },
+  "upgrade": {
+    "title": "Need more users?",
+    "description": "Upgrade to Enterprise for unlimited users",
+    "button": "View plans"
+  },
+  "sections": {
+    "main": "Main",
+    "management": "Management",
+    "system": "System"
+  }
+}
