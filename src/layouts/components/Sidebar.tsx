@@ -12,6 +12,7 @@ import {
   FileText,
   HelpCircle,
   Settings,
+  Tag,
   type LucideIcon,
 } from 'lucide-react'
 import { useUiStore } from '@/store/uiStore'
@@ -49,6 +50,7 @@ function Sidebar() {
         { label: t('menu.roles'), to: '/roles', icon: Shield, permission: 'rbac.view_role' },
         { label: t('menu.permissions'), to: '/permissions', icon: Key, permission: 'rbac.view_permission' },
         { label: t('menu.clients'), to: '/clients', icon: Building2, permission: null },
+        { label: t('menu.promotions'), to: '/promotions', icon: Tag, permission: null },
         { label: t('menu.analytics'), to: '/reports', icon: BarChart3, permission: 'analytics.view_reports' },
         { label: t('menu.audit'), to: '/audit', icon: FileText, permission: 'audit.view_auditlog' },
       ],
