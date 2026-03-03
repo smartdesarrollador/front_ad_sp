@@ -29,6 +29,11 @@ export const router = createBrowserRouter([
                 lazy: () =>
                   import('@/pages/RolesPage').then((m) => ({ Component: m.default })),
               },
+              {
+                path: 'permissions',
+                lazy: () =>
+                  import('@/pages/PermissionsPage').then((m) => ({ Component: m.default })),
+              },
             ],
           },
         ],
