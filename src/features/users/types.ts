@@ -17,6 +17,8 @@ export interface AuditLogEntry {
   user_name: string | null
   ip_address: string | null
   created_at: string
+  user_agent?: string
+  extra?: Record<string, unknown>
 }
 
 export interface Role {
