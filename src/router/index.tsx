@@ -19,6 +19,11 @@ export const router = createBrowserRouter([
                 lazy: () =>
                   import('@/pages/DashboardPage').then((m) => ({ Component: m.default })),
               },
+              {
+                path: 'users',
+                lazy: () =>
+                  import('@/pages/UsersPage').then((m) => ({ Component: m.default })),
+              },
             ],
           },
         ],

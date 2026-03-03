@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api'
-import type { AdminUser } from '../types'
+import type { AdminUser } from '@/features/users/types'
 
 interface UsersResponse {
   users: AdminUser[]
