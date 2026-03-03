@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom'
 import App from '@/App'
 import ProtectedRoute from '@/features/auth/components/ProtectedRoute'
+import AppLayout from '@/layouts/AppLayout'
 
 export const router = createBrowserRouter([
   {
@@ -11,9 +12,14 @@ export const router = createBrowserRouter([
         element: <ProtectedRoute />,
         children: [
           {
-            index: true,
-            lazy: () =>
-              import('@/pages/DashboardPage').then((m) => ({ Component: m.default })),
+            element: <AppLayout />,
+            children: [
+              {
+                index: true,
+                lazy: () =>
+                  import('@/pages/DashboardPage').then((m) => ({ Component: m.default })),
+              },
+            ],
           },
         ],
       },

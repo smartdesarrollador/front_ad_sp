@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import { apiClient, publicClient } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
-import type { LoginResponse, MFALoginResponse, RegisterRequest, User } from '@/types/auth'
+import type { LoginResponse, MFALoginResponse, RegisterRequest, Tenant, User } from '@/types/auth'
 
 export type LoginResult = { ok: true } | { mfaRequired: true; mfaToken: string }
 
@@ -16,7 +16,7 @@ const AuthContext = createContext<AuthContextType | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
-  const { setUser, setAccessToken, clearAuth } = useAuthStore()
+  const { setUser, setTenant, setAccessToken, clearAuth } = useAuthStore()
 
   useEffect(() => {
     const refresh = localStorage.getItem('refreshToken')
@@ -42,6 +42,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             clearAuth()
           }
         }
+        const storedTenant = localStorage.getItem('authTenant')
+        if (storedTenant) {
+          try {
+            const tenant = JSON.parse(storedTenant) as Tenant
+            setTenant(tenant)
+          } catch {
+            localStorage.removeItem('authTenant')
+          }
+        }
       })
       .catch(() => {
         localStorage.removeItem('authUser')
@@ -64,9 +73,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     const loginData = data as LoginResponse
     setUser(loginData.user)
+    setTenant(loginData.tenant)
     setAccessToken(loginData.access_token)
     localStorage.setItem('refreshToken', loginData.refresh_token)
     localStorage.setItem('authUser', JSON.stringify(loginData.user))
+    localStorage.setItem('authTenant', JSON.stringify(loginData.tenant))
     return { ok: true }
   }
 
@@ -75,6 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await apiClient.post('/auth/logout')
     } finally {
       localStorage.removeItem('authUser')
+      localStorage.removeItem('authTenant')
       clearAuth()
     }
   }
