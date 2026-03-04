@@ -16,6 +16,7 @@ export default defineConfig({
     },
   },
   build: {
+    sourcemap: false,
     rollupOptions: {
       output: {
         manualChunks: {
@@ -23,6 +24,7 @@ export default defineConfig({
           'vendor-query': ['@tanstack/react-query'],
           'vendor-charts': ['recharts'],
           'vendor-virtual': ['@tanstack/react-virtual'],
+          'vendor-i18n': ['i18next', 'react-i18next'],
         },
       },
     },
