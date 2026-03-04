@@ -15,6 +15,15 @@ vi.mock('@/store/uiStore')
 vi.mock('@/features/auth/AuthContext')
 vi.mock('@/hooks/usePermissions')
 vi.mock('@/hooks/useFeatureGate')
+vi.mock('@/features/notifications/hooks/useNotifications', () => ({
+  useNotifications: () => ({ notifications: [], unreadCount: 0, isLoading: false }),
+}))
+vi.mock('@/features/notifications/hooks/useMarkAsRead', () => ({
+  useMarkAsRead: () => ({ mutate: vi.fn(), isPending: false }),
+}))
+vi.mock('@/features/notifications/hooks/useMarkAllAsRead', () => ({
+  useMarkAllAsRead: () => ({ mutate: vi.fn(), isPending: false }),
+}))
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => key,
@@ -40,6 +49,8 @@ const mockUiState = {
   addNotification: vi.fn(),
   clearNotifications: vi.fn(),
 }
+// Note: notifications/markNotificationRead kept in mockUiState for store shape compatibility
+// but Navbar now reads notifications from useNotifications() hook instead
 
 const mockAuthState = {
   user: {

@@ -6,6 +6,10 @@ import { useAuthStore } from '@/store/authStore'
 import { useUiStore } from '@/store/uiStore'
 import { useAuthContext } from '@/features/auth/AuthContext'
 import { usePermissions } from '@/hooks/usePermissions'
+import { useNotifications } from '@/features/notifications/hooks/useNotifications'
+import { useMarkAsRead } from '@/features/notifications/hooks/useMarkAsRead'
+import { useMarkAllAsRead } from '@/features/notifications/hooks/useMarkAllAsRead'
+import { ICON_MAP, CATEGORY_COLORS } from '@/features/notifications/components/NotificationItem'
 import LanguageSwitcher from './LanguageSwitcher'
 
 function Navbar() {
@@ -14,15 +18,15 @@ function Navbar() {
   const { logout } = useAuthContext()
   const user = useAuthStore((s) => s.user)
   const tenant = useAuthStore((s) => s.tenant)
-  const { toggleSidebar, darkMode, toggleDarkMode, notifications, markNotificationRead } =
-    useUiStore()
+  const { toggleSidebar, darkMode, toggleDarkMode } = useUiStore()
   const { getPrimaryRole, getRoleColor } = usePermissions()
+  const { notifications, unreadCount } = useNotifications()
+  const markAsRead = useMarkAsRead()
+  const markAllAsRead = useMarkAllAsRead()
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
 
-  const unreadCount = notifications.filter((n) => !n.read).length
-  const markAllRead = () =>
-    notifications.forEach((n) => !n.read && markNotificationRead(n.id))
+  const markAllRead = () => markAllAsRead.mutate()
 
   const handleLogout = async () => {
     setUserMenuOpen(false)
@@ -135,30 +139,48 @@ function Navbar() {
                       {t('notifications.empty')}
                     </p>
                   ) : (
-                    notifications.map((n) => (
-                      <div
-                        key={n.id}
-                        className={`px-4 py-3 flex gap-3 ${!n.read ? 'bg-primary-50 dark:bg-primary-900/20' : ''}`}
-                      >
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-gray-900 dark:text-white truncate">
-                            {n.message}
-                          </p>
-                        </div>
-                        {!n.read && (
-                          <span className="w-2 h-2 bg-primary-500 rounded-full flex-shrink-0 mt-1" />
-                        )}
-                      </div>
-                    ))
+                    notifications.slice(0, 5).map((n) => {
+                      const Icon = ICON_MAP[n.icon] ?? Bell
+                      const colorClass = CATEGORY_COLORS[n.category]
+                      return (
+                        <button
+                          key={n.id}
+                          onClick={() => markAsRead.mutate(n.id)}
+                          className={`w-full px-4 py-3 flex gap-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${!n.read ? 'bg-primary-50 dark:bg-primary-900/20' : ''}`}
+                        >
+                          <div
+                            className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${colorClass}`}
+                          >
+                            <Icon className="w-4 h-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                {n.title}
+                              </p>
+                              {!n.read && (
+                                <span className="w-2 h-2 bg-primary-500 rounded-full flex-shrink-0" />
+                              )}
+                            </div>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                              {n.message}
+                            </p>
+                          </div>
+                        </button>
+                      )
+                    })
                   )}
                 </div>
 
                 <div className="border-t border-gray-100 dark:border-gray-700 px-4 py-2 text-center">
                   <button
-                    onClick={() => setNotifOpen(false)}
+                    onClick={() => {
+                      navigate('/notifications')
+                      setNotifOpen(false)
+                    }}
                     className="text-xs text-primary-600 dark:text-primary-400 hover:underline"
                   >
-                    {t('notifications.close')}
+                    Ver todas →
                   </button>
                 </div>
               </div>
