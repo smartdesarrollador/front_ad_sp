@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, lazy, Suspense } from 'react'
 import { Plus, Tag } from 'lucide-react'
 import { usePromotions } from './hooks/usePromotions'
 import { useUpdatePromotion } from './hooks/useUpdatePromotion'
@@ -6,8 +6,11 @@ import { useDeletePromotion } from './hooks/useDeletePromotion'
 import { usePermissions } from '@/hooks/usePermissions'
 import { PromotionCard } from './components/PromotionCard'
 import { PromotionModal } from './components/PromotionModal'
-import { PromotionStatsModal } from './components/PromotionStatsModal'
 import type { Promotion, PromotionStatus, PromotionType } from './types'
+
+const PromotionStatsModal = lazy(() =>
+  import('./components/PromotionStatsModal').then((m) => ({ default: m.PromotionStatsModal })),
+)
 
 export default function PromotionsPage() {
   const { promotions, isLoading } = usePromotions()
@@ -206,10 +209,14 @@ export default function PromotionsPage() {
         onClose={handleCloseModal}
       />
 
-      <PromotionStatsModal
-        promotion={statsPromotion}
-        onClose={() => setStatsPromotion(null)}
-      />
+      {statsPromotion && (
+        <Suspense fallback={null}>
+          <PromotionStatsModal
+            promotion={statsPromotion}
+            onClose={() => setStatsPromotion(null)}
+          />
+        </Suspense>
+      )}
     </div>
   )
 }

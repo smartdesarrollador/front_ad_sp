@@ -1,9 +1,11 @@
+import { useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { X } from 'lucide-react'
 import { useInviteUser } from '../hooks/useInviteUser'
 import { useRolesForSelect } from '../hooks/useRolesForSelect'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 
 const schema = z.object({
   email: z.string().email('Email inválido'),
@@ -20,6 +22,8 @@ interface InviteUserModalProps {
 export function InviteUserModal({ isOpen, onClose }: InviteUserModalProps) {
   const { mutate, isPending, error } = useInviteUser()
   const { roles } = useRolesForSelect()
+  const modalRef = useRef<HTMLDivElement>(null)
+  useFocusTrap(modalRef, isOpen)
 
   const {
     register,
@@ -49,12 +53,19 @@ export function InviteUserModal({ isOpen, onClose }: InviteUserModalProps) {
     <>
       <div className="fixed inset-0 bg-black/40 z-50" onClick={onClose} aria-hidden="true" />
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl w-full max-w-md">
+        <div
+          ref={modalRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="invite-user-modal-title"
+          className="bg-white dark:bg-gray-900 rounded-lg shadow-xl w-full max-w-md"
+        >
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Invitar Usuario</h2>
+            <h2 id="invite-user-modal-title" className="text-lg font-semibold text-gray-900 dark:text-white">Invitar Usuario</h2>
             <button
               onClick={onClose}
+              aria-label="Cerrar"
               className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500"
             >
               <X className="h-5 w-5" />

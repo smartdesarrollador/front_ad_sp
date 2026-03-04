@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -7,6 +7,7 @@ import { useCreateRole } from '../hooks/useCreateRole'
 import { useUpdateRole } from '../hooks/useUpdateRole'
 import { usePermissionsList } from '../hooks/usePermissionsList'
 import { PermissionsSelector } from './PermissionsSelector'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { RoleDetail } from '../types'
 
 const schema = z.object({
@@ -27,6 +28,8 @@ export function RoleModal({ role, isOpen, onClose }: RoleModalProps) {
   const createRole = useCreateRole()
   const updateRole = useUpdateRole()
   const { permissions, isLoading: loadingPerms } = usePermissionsList()
+  const modalRef = useRef<HTMLDivElement>(null)
+  useFocusTrap(modalRef, isOpen)
 
   const [selectedPermissionIds, setSelectedPermissionIds] = useState<string[]>([])
 
@@ -75,14 +78,21 @@ export function RoleModal({ role, isOpen, onClose }: RoleModalProps) {
     <>
       <div className="fixed inset-0 bg-black/40 z-50" onClick={onClose} aria-hidden="true" />
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+        <div
+          ref={modalRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="role-modal-title"
+          className="bg-white dark:bg-gray-900 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col"
+        >
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h2 id="role-modal-title" className="text-lg font-semibold text-gray-900 dark:text-white">
               {isEdit ? 'Editar Rol' : 'Nuevo Rol'}
             </h2>
             <button
               onClick={onClose}
+              aria-label="Cerrar"
               className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500"
             >
               <X className="h-5 w-5" />

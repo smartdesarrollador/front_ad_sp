@@ -170,6 +170,7 @@ export function PromotionCard({
                 <button
                   onClick={() => onViewStats(promotion)}
                   title="Ver estadísticas"
+                  aria-label={`Ver estadísticas de ${promotion.name}`}
                   className="p-1.5 rounded text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                 >
                   <BarChart3 className="h-4 w-4" />
@@ -179,6 +180,7 @@ export function PromotionCard({
                 <button
                   onClick={() => onEdit(promotion)}
                   title="Editar promoción"
+                  aria-label={`Editar promoción ${promotion.name}`}
                   className="p-1.5 rounded text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                 >
                   <Pencil className="h-4 w-4" />
@@ -188,6 +190,7 @@ export function PromotionCard({
                 <button
                   onClick={() => onToggle(promotion)}
                   title={promotion.status === 'active' ? 'Pausar' : 'Activar'}
+                  aria-label={promotion.status === 'active' ? `Pausar promoción ${promotion.name}` : `Activar promoción ${promotion.name}`}
                   className="p-1.5 rounded text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
                 >
                   {promotion.status === 'active' ? (
@@ -201,6 +204,7 @@ export function PromotionCard({
                 <button
                   onClick={() => setConfirming(true)}
                   title="Eliminar promoción"
+                  aria-label={`Eliminar promoción ${promotion.name}`}
                   className="p-1.5 rounded text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
                 >
                   <Trash2 className="h-4 w-4" />

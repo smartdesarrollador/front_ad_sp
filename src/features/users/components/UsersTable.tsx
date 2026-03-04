@@ -115,6 +115,7 @@ export function UsersTable({ users, isLoading, canEdit, onView, onEdit, onSuspen
                       <button
                         onClick={() => onView(user)}
                         title="Ver detalle"
+                        aria-label={`Ver detalle de ${user.name}`}
                         className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
                       >
                         <Eye className="h-4 w-4" />
@@ -124,6 +125,7 @@ export function UsersTable({ users, isLoading, canEdit, onView, onEdit, onSuspen
                           <button
                             onClick={() => onEdit(user)}
                             title="Editar"
+                            aria-label={`Editar usuario ${user.name}`}
                             className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
                           >
                             <Pencil className="h-4 w-4" />
@@ -131,6 +133,7 @@ export function UsersTable({ users, isLoading, canEdit, onView, onEdit, onSuspen
                           <button
                             onClick={() => onSuspend(user)}
                             title={user.is_active ? 'Suspender' : 'Activar'}
+                            aria-label={user.is_active ? `Suspender usuario ${user.name}` : `Activar usuario ${user.name}`}
                             className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
                           >
                             {user.is_active ? (
