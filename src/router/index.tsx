@@ -74,6 +74,11 @@ export const router = createBrowserRouter([
                 lazy: () =>
                   import('@/pages/NotificationsPage').then((m) => ({ Component: m.default })),
               },
+              {
+                path: 'settings',
+                lazy: () =>
+                  import('@/pages/SettingsPage').then((m) => ({ Component: m.default })),
+              },
             ],
           },
         ],
