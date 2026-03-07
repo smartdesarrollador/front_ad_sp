@@ -92,7 +92,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const register = async (data: RegisterRequest): Promise<void> => {
-    await publicClient.post('/auth/register', data)
+    await publicClient.post('/auth/register', {
+      name: data.name,
+      email: data.email,
+      organization_name: data.organizationName,
+      password: data.password,
+      password2: data.confirmPassword,
+    })
   }
 
   return (

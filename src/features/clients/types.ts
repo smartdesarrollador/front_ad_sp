@@ -2,7 +2,7 @@ import type { SubscriptionUsage, PlanType } from '@/features/subscriptions/types
 
 export type { SubscriptionUsage, PlanType }
 
-export type ClientSubscriptionStatus = 'active' | 'trial' | 'past_due' | 'cancelled'
+export type ClientSubscriptionStatus = 'active' | 'trial' | 'past_due' | 'cancelled' | 'unpaid'
 
 export interface ClientSubscription {
   status: ClientSubscriptionStatus

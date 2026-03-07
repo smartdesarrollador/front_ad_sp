@@ -42,6 +42,11 @@ const STATUS_CONFIG: Record<ClientSubscriptionStatus, StatusConfig> = {
     icon: XCircle,
     css: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
   },
+  unpaid: {
+    label: 'Impago',
+    icon: AlertTriangle,
+    css: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
+  },
 }
 
 function ClientAvatar({ name, primaryColor }: { name: string; primaryColor: string | null }) {
@@ -106,7 +111,7 @@ export function ClientsTable({ clients, isLoading, canEdit, onView, onSuspend }:
 
           {!isLoading &&
             clients.map((client) => {
-              const statusCfg = STATUS_CONFIG[client.subscription.status]
+              const statusCfg = STATUS_CONFIG[client.subscription.status] ?? STATUS_CONFIG['cancelled']
               const StatusIcon = statusCfg.icon
               const planCss = PLAN_BADGE_CLASSES[client.subscription.plan]
               const planName = PLAN_NAMES[client.subscription.plan]
