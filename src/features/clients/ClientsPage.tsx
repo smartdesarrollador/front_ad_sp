@@ -23,7 +23,7 @@ export default function ClientsPage() {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
   const [clientToSuspend, setClientToSuspend] = useState<Client | null>(null)
 
-  const canEdit = hasPermission('clients.update')
+  const canEdit = hasPermission('customers.update')
 
   const filtered = clients.filter((c) => {
     const q = search.toLowerCase()

@@ -95,4 +95,14 @@ describe('LoginPage', () => {
     expect(button).toBeDisabled()
     expect(button.querySelector('.animate-spin')).toBeInTheDocument()
   })
+
+  it('does not render a register link', () => {
+    render(<LoginPage />, { wrapper })
+    expect(screen.queryByRole('link', { name: /crear cuenta/i })).not.toBeInTheDocument()
+  })
+
+  it('renders invitation-only message', () => {
+    render(<LoginPage />, { wrapper })
+    expect(screen.getByText(/acceso solo por invitación/i)).toBeInTheDocument()
+  })
 })

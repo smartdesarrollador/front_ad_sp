@@ -32,6 +32,7 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 5174,
+    allowedHosts: ['rbac-admin.local.test', 'admin.local.test'],
     proxy: {
       '/api': {
         target: process.env.API_TARGET || 'http://localhost:8000',

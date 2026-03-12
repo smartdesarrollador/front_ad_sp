@@ -21,6 +21,7 @@ type FormData = z.infer<typeof schema>
 
 interface LocationState {
   resetSuccess?: boolean
+  inviteSuccess?: boolean
 }
 
 export default function LoginPage() {
@@ -124,6 +125,12 @@ export default function LoginPage() {
           </div>
         )}
 
+        {state?.inviteSuccess && (
+          <div className="rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-3 text-sm text-green-700 dark:text-green-300">
+            Cuenta activada correctamente. Inicia sesión para continuar.
+          </div>
+        )}
+
         {globalError && (
           <div
             role="alert"
@@ -210,12 +217,9 @@ export default function LoginPage() {
           >
             ¿Olvidaste tu contraseña?
           </Link>
-          <Link
-            to="/register"
-            className="text-primary-600 hover:text-primary-700 dark:text-primary-400"
-          >
-            Crear cuenta
-          </Link>
+          <span className="text-gray-500 dark:text-gray-400 text-xs italic">
+            Acceso solo por invitación
+          </span>
         </div>
       </div>
     </AuthLayout>
