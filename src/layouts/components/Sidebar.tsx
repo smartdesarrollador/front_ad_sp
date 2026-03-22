@@ -46,13 +46,13 @@ function Sidebar() {
     {
       group: t('sections.management'),
       items: [
-        { label: t('menu.users'), to: '/users', icon: Users, permission: 'auth_app.view_customuser' },
-        { label: t('menu.roles'), to: '/roles', icon: Shield, permission: 'rbac.view_role' },
-        { label: t('menu.permissions'), to: '/permissions', icon: Key, permission: 'rbac.view_permission' },
+        { label: t('menu.users'), to: '/users', icon: Users, permission: 'users.read' },
+        { label: t('menu.roles'), to: '/roles', icon: Shield, permission: 'roles.read' },
+        { label: t('menu.permissions'), to: '/permissions', icon: Key, permission: 'roles.read' },
         { label: t('menu.clients'), to: '/clients', icon: Building2, permission: null },
         { label: t('menu.promotions'), to: '/promotions', icon: Tag, permission: null },
-        { label: t('menu.analytics'), to: '/reports', icon: BarChart3, permission: 'analytics.view_reports' },
-        { label: t('menu.audit'), to: '/audit', icon: FileText, permission: 'audit.view_auditlog' },
+        { label: t('menu.analytics'), to: '/reports', icon: BarChart3, permission: 'analytics.read' },
+        { label: t('menu.audit'), to: '/audit', icon: FileText, permission: 'audit.read' },
       ],
     },
     {

@@ -104,11 +104,6 @@ export const router = createBrowserRouter([
           import('@/features/auth/AcceptInvitePage').then((m) => ({ Component: m.default })),
       },
       {
-        path: 'auth/google/callback',
-        lazy: () =>
-          import('@/features/auth/GoogleCallbackPage').then((m) => ({ Component: m.default })),
-      },
-      {
         path: '*',
         element: <Navigate to="/login" replace />,
       },

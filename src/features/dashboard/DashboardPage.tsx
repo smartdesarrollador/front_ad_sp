@@ -13,8 +13,8 @@ export default function DashboardPage() {
   const stats = useDashboardStats()
   const audit = useRecentAudit()
 
-  const canViewUsers = hasPermission('auth_app.view_customuser')
-  const canViewAudit = hasPermission('audit.view_auditlog')
+  const canViewUsers = hasPermission('users.read')
+  const canViewAudit = hasPermission('audit.read')
 
   const usersLimit = getLimit('users')
   const isNearLimit =

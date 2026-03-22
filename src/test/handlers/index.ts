@@ -10,7 +10,7 @@ const mockUser = {
   lastName: 'User',
   name: 'Admin User',
   roles: ['OrgAdmin'],
-  permissions: ['users.invite', 'users.update', 'audit.view_auditlog'],
+  permissions: ['users.invite', 'users.update', 'audit.read'],
   status: 'active' as const,
   mfaEnabled: false,
   tenantId: 'tenant-1',

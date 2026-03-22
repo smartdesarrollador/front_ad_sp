@@ -32,11 +32,6 @@ describe('LoginPage', () => {
     expect(screen.getByRole('button', { name: /iniciar sesión/i })).toBeInTheDocument()
   })
 
-  it('renders Google OAuth button', () => {
-    render(<LoginPage />, { wrapper })
-    expect(screen.getByRole('button', { name: /continuar con google/i })).toBeInTheDocument()
-  })
-
   it('calls mutate with credentials on valid submit', async () => {
     const user = userEvent.setup()
     const mockMutate = vi.fn()

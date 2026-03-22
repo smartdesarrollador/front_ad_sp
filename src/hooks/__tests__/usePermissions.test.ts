@@ -54,7 +54,7 @@ describe('usePermissions', () => {
 
   it('hasPermission returns true only for permissions in the array', () => {
     useAuthStore.setState({
-      user: { ...baseUser, roles: ['Member'], permissions: ['users.invite', 'audit.view_auditlog'] },
+      user: { ...baseUser, roles: ['Member'], permissions: ['users.invite', 'audit.read'] },
       tenant: baseTenant,
       isAuthenticated: true,
     })

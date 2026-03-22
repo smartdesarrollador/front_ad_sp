@@ -60,7 +60,7 @@ const mockAuthState = {
     firstName: 'Admin',
     lastName: 'User',
     roles: ['OrgAdmin'],
-    permissions: ['auth_app.view_customuser', 'rbac.view_role', 'rbac.view_permission'],
+    permissions: ['users.read', 'roles.read', 'analytics.read', 'audit.read'],
     status: 'active' as const,
     mfaEnabled: false,
     tenantId: 't1',

@@ -35,7 +35,7 @@ export function usePermissions(): UsePermissionsReturn {
 
   const isOwner = hasRole('Owner')
   const isAdmin = isOwner || hasRole('OrgAdmin')
-  const canManageBilling = isAdmin || hasPermission('subscriptions.view_billing')
+  const canManageBilling = isAdmin || hasPermission('billing.manage')
   const canUpgradePlan = plan === 'free' || plan === 'starter'
 
   const getPrimaryRole = (): string => user?.roles[0] ?? 'Guest'

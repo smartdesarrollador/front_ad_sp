@@ -6,7 +6,6 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import axios from 'axios'
 import AuthLayout from './components/AuthLayout'
-import GoogleOAuthButton from './components/GoogleOAuthButton'
 import { useLogin } from './hooks/useLogin'
 import { publicClient } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
@@ -198,17 +197,6 @@ export default function LoginPage() {
             )}
           </button>
         </form>
-
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300 dark:border-gray-600" />
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white dark:bg-gray-800 text-gray-500">o</span>
-          </div>
-        </div>
-
-        <GoogleOAuthButton />
 
         <div className="flex items-center justify-between text-sm">
           <Link

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider, Outlet } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -7,10 +7,6 @@ import { server } from '@/test/server'
 import { AuthProvider } from '../AuthContext'
 import LoginPage from '../LoginPage'
 import { useAuthStore } from '@/store/authStore'
-
-vi.mock('@/features/auth/components/GoogleOAuthButton', () => ({
-  default: () => <button>Google</button>,
-}))
 
 function buildRouter() {
   return createMemoryRouter(
