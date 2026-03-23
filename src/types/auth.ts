@@ -8,6 +8,7 @@ export interface User {
   permissions: string[]
   status: 'active' | 'inactive' | 'pending'
   mfaEnabled: boolean
+  is_staff: boolean
   tenantId: string
   lastLogin: string | null
   createdAt: string

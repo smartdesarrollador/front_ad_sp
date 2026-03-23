@@ -21,6 +21,7 @@ type FormData = z.infer<typeof schema>
 interface LocationState {
   resetSuccess?: boolean
   inviteSuccess?: boolean
+  error?: string
 }
 
 export default function LoginPage() {
@@ -59,6 +60,8 @@ export default function LoginPage() {
       onSuccess: (result) => {
         if ('mfaRequired' in result) {
           setMfaState({ token: result.mfaToken })
+        } else if ('error' in result && result.error === 'no_admin_access') {
+          setGlobalError('no_admin_access')
         }
       },
       onError: (error) => {
@@ -130,12 +133,24 @@ export default function LoginPage() {
           </div>
         )}
 
-        {globalError && (
+        {(globalError || state?.error === 'no_admin_access') && (
           <div
             role="alert"
-            className="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3 text-sm text-red-700 dark:text-red-300"
+            className="rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-3 text-sm text-yellow-800 dark:text-yellow-300"
           >
-            {globalError}
+            {globalError === 'no_admin_access' || state?.error === 'no_admin_access' ? (
+              <span>
+                Esta cuenta no tiene acceso al panel de administración.{' '}
+                <a
+                  href="http://hub.local.test/login"
+                  className="underline font-medium hover:text-yellow-900 dark:hover:text-yellow-200"
+                >
+                  Ir al Hub de Servicios
+                </a>
+              </span>
+            ) : (
+              globalError
+            )}
           </div>
         )}
 

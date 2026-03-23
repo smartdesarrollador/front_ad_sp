@@ -13,6 +13,7 @@ import {
   HelpCircle,
   Settings,
   Tag,
+  Package,
   type LucideIcon,
 } from 'lucide-react'
 import { useUiStore } from '@/store/uiStore'
@@ -60,6 +61,7 @@ function Sidebar() {
       items: [
         { label: t('menu.subscription'), to: '/subscription', icon: CreditCard, permission: null },
         { label: t('menu.billing'), to: '/billing', icon: Receipt, permission: null },
+        { label: 'Planes', to: '/plans', icon: Package, permission: null },
       ],
     },
     {

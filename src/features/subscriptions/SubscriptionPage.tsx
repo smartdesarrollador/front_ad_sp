@@ -4,12 +4,12 @@ import { usePermissions } from '@/hooks/usePermissions'
 import { useCurrentSubscription } from './hooks/useCurrentSubscription'
 import { useUpgradeSubscription } from './hooks/useUpgradeSubscription'
 import { useInvoices } from './hooks/useInvoices'
+import { usePlans } from './hooks/usePlans'
 import { CurrentPlanCard } from './components/CurrentPlanCard'
 import { UsageMeters } from './components/UsageMeters'
 import { PlanComparisonGrid } from './components/PlanComparisonGrid'
 import { UpgradePlanModal } from './components/UpgradePlanModal'
 import { InvoicePreview } from './components/InvoicePreview'
-import { PLANS } from './plans-data'
 import type { BillingCycle, PlanType, UpgradeRequest } from './types'
 
 export default function SubscriptionPage() {
@@ -19,10 +19,11 @@ export default function SubscriptionPage() {
   const { subscription, isLoading } = useCurrentSubscription()
   const { invoices, isLoading: loadingInvoices } = useInvoices()
   const { mutate: upgradePlan, isPending: upgrading } = useUpgradeSubscription()
+  const { plans } = usePlans()
 
   const { canManageBilling, canUpgradePlan } = usePermissions()
 
-  const targetPlanData = upgradeTarget ? PLANS.find((p) => p.id === upgradeTarget) ?? null : null
+  const targetPlanData = upgradeTarget ? plans.find((p) => p.id === upgradeTarget) ?? null : null
 
   const handleUpgradeRequest = (plan: PlanType) => {
     if (!canManageBilling) return
@@ -60,6 +61,7 @@ export default function SubscriptionPage() {
       {/* Plan + Usage row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <CurrentPlanCard
+          plans={plans}
           subscription={subscription}
           canManageBilling={canManageBilling}
           onChangePlan={() => {}}
@@ -75,6 +77,7 @@ export default function SubscriptionPage() {
       {/* Plan comparison */}
       {subscription && (
         <PlanComparisonGrid
+          plans={plans}
           currentPlan={subscription.plan}
           billingCycle={billingCycle}
           onBillingCycleChange={setBillingCycle}

@@ -12,6 +12,18 @@ vi.mock('@/hooks/usePermissions')
 vi.mock('../hooks/useCurrentSubscription')
 vi.mock('../hooks/useInvoices')
 vi.mock('../hooks/useUpgradeSubscription')
+vi.mock('../hooks/usePlans', () => ({
+  usePlans: () => ({
+    plans: [
+      { id: 'free', displayName: 'Free', priceMonthly: 0, priceAnnual: 0, description: 'Free', popular: false, features: [] },
+      { id: 'starter', displayName: 'Starter', priceMonthly: 29, priceAnnual: 313, description: 'Starter', popular: false, features: [] },
+      { id: 'professional', displayName: 'Professional', priceMonthly: 79, priceAnnual: 854, description: 'Professional', popular: true, features: [] },
+      { id: 'enterprise', displayName: 'Enterprise', priceMonthly: 199, priceAnnual: 2149, description: 'Enterprise', popular: false, features: [] },
+    ],
+    isLoading: false,
+    isError: false,
+  }),
+}))
 
 const mockPermissionsAdmin = {
   hasPermission: () => true,
@@ -73,7 +85,7 @@ describe('SubscriptionPage', () => {
 
     renderPage()
 
-    expect(screen.getAllByText('Plan Profesional').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Professional').length).toBeGreaterThan(0)
     expect(screen.getByText('Activo')).toBeInTheDocument()
   })
 

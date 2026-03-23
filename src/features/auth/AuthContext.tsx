@@ -3,7 +3,7 @@ import { apiClient, publicClient } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
 import type { LoginResponse, MFALoginResponse, RegisterRequest, Tenant, User } from '@/types/auth'
 
-export type LoginResult = { ok: true } | { mfaRequired: true; mfaToken: string }
+export type LoginResult = { ok: true } | { mfaRequired: true; mfaToken: string } | { ok: false; error: string }
 
 interface AuthContextType {
   isLoading: boolean
@@ -36,7 +36,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (storedUser) {
           try {
             const user = JSON.parse(storedUser) as User
-            setUser(user)
+            if (!user.is_staff) {
+              localStorage.removeItem('authUser')
+              localStorage.removeItem('authTenant')
+              clearAuth()
+            } else {
+              setUser(user)
+            }
           } catch {
             localStorage.removeItem('authUser')
             clearAuth()
@@ -72,6 +78,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { mfaRequired: true, mfaToken: data.mfa_token }
     }
     const loginData = data as LoginResponse
+    if (!loginData.user.is_staff) {
+      return { ok: false, error: 'no_admin_access' }
+    }
     setUser(loginData.user)
     setTenant(loginData.tenant)
     setAccessToken(loginData.access_token)

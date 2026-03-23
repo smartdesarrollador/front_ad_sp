@@ -1,6 +1,5 @@
 import { AlertTriangle, RefreshCw } from 'lucide-react'
-import type { CurrentSubscription } from '../types'
-import { PLANS } from '../plans-data'
+import type { CurrentSubscription, PlanData } from '../types'
 
 const STATUS_LABELS: Record<string, { label: string; className: string }> = {
   active: { label: 'Activo', className: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' },
@@ -11,6 +10,7 @@ const STATUS_LABELS: Record<string, { label: string; className: string }> = {
 }
 
 interface Props {
+  plans: PlanData[]
   subscription: CurrentSubscription | null
   canManageBilling: boolean
   onChangePlan: () => void
@@ -25,7 +25,7 @@ function formatDate(dateStr: string | null): string {
   })
 }
 
-export function CurrentPlanCard({ subscription, canManageBilling, onChangePlan }: Props) {
+export function CurrentPlanCard({ plans, subscription, canManageBilling, onChangePlan }: Props) {
   if (!subscription) {
     return (
       <div className="rounded-xl bg-gradient-to-br from-primary-600 to-primary-700 dark:from-primary-700 dark:to-primary-900 p-6 text-white animate-pulse">
@@ -37,7 +37,7 @@ export function CurrentPlanCard({ subscription, canManageBilling, onChangePlan }
     )
   }
 
-  const planData = PLANS.find((p) => p.id === subscription.plan)
+  const planData = plans.find((p) => p.id === subscription.plan)
   const statusInfo = STATUS_LABELS[subscription.status] ?? STATUS_LABELS.active
   const renewalDate = subscription.status === 'trialing' ? subscription.trial_end : subscription.current_period_end
 

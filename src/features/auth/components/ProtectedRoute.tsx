@@ -2,7 +2,7 @@ import { Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 
 export default function ProtectedRoute() {
-  const { isLoading, isAuthenticated } = useAuth()
+  const { isLoading, isAuthenticated, user } = useAuth()
 
   if (isLoading) {
     return (
@@ -18,6 +18,10 @@ export default function ProtectedRoute() {
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />
+  }
+
+  if (!user?.is_staff) {
+    return <Navigate to="/login" state={{ error: 'no_admin_access' }} replace />
   }
 
   return <Outlet />
