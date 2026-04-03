@@ -63,6 +63,7 @@ const mockAuthState = {
     permissions: ['users.read', 'roles.read', 'analytics.read', 'audit.read'],
     status: 'active' as const,
     mfaEnabled: false,
+    is_staff: true,
     tenantId: 't1',
     lastLogin: null,
     createdAt: '2026-01-01',

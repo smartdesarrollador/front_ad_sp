@@ -52,7 +52,7 @@ const mockMutation = {
 
 const mockUser = {
   id: 'u1', email: 'admin@acme.com', firstName: 'Admin', lastName: 'User', name: 'Admin User',
-  roles: ['Owner'], permissions: [], status: 'active' as const, mfaEnabled: false,
+  roles: ['Owner'], permissions: [], status: 'active' as const, mfaEnabled: false, is_staff: true,
   tenantId: 't1', lastLogin: null, createdAt: '2026-01-01T00:00:00Z',
 }
 

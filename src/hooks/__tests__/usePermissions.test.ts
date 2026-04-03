@@ -11,6 +11,7 @@ const baseUser = {
   name: 'Test User',
   status: 'active' as const,
   mfaEnabled: false,
+  is_staff: false,
   tenantId: 't1',
   lastLogin: null,
   createdAt: '2024-01-01T00:00:00Z',
