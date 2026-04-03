@@ -1,4 +1,4 @@
-# docker-compose.dokploy.yml — para Dokploy (Traefik, no Nginx Proxy Manager)
+# docker-compose.dokploy.yml — para Dokploy (Traefik gestionado por Dokploy UI)
 
 services:
   admin:
@@ -12,12 +12,6 @@ services:
     restart: unless-stopped
     networks:
       - dokploy-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.rbac-admin.rule=Host(`${ADMIN_DOMAIN}`)"
-      - "traefik.http.routers.rbac-admin.entrypoints=websecure"
-      - "traefik.http.routers.rbac-admin.tls.certResolver=letsencrypt"
-      - "traefik.http.services.rbac-admin.loadbalancer.server.port=80"
 
 networks:
   dokploy-network:
