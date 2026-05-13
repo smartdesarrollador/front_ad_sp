@@ -80,6 +80,11 @@ export const router = createBrowserRouter([
                   import('@/pages/NotificationsPage').then((m) => ({ Component: m.default })),
               },
               {
+                path: 'releases',
+                lazy: () =>
+                  import('@/pages/ReleasesPage').then((m) => ({ Component: m.default })),
+              },
+              {
                 path: 'settings',
                 lazy: () =>
                   import('@/pages/SettingsPage').then((m) => ({ Component: m.default })),
