@@ -9,7 +9,7 @@ import { useCreateLicense } from '../hooks/useCreateLicense'
 
 const schema = z.object({
   user_id: z.string().min(1, 'Selecciona un usuario'),
-  send_email: z.boolean().default(true),
+  send_email: z.boolean(),
   notes: z.string().optional(),
 })
 
@@ -33,7 +33,7 @@ export function CreateLicenseModal({ isOpen, onClose }: CreateLicenseModalProps)
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<FormValues>({ resolver: zodResolver(schema) })
+  } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: { send_email: true } })
 
   const filteredUsers = users.filter(
     (u) =>
