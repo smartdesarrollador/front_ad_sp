@@ -15,6 +15,7 @@ import {
   Tag,
   Package,
   MonitorDown,
+  KeyRound,
   type LucideIcon,
 } from 'lucide-react'
 import { useUiStore } from '@/store/uiStore'
@@ -64,6 +65,7 @@ function Sidebar() {
         { label: t('menu.billing'), to: '/billing', icon: Receipt, permission: null },
         { label: 'Planes', to: '/plans', icon: Package, permission: null },
         { label: 'Desktop App', to: '/releases', icon: MonitorDown, permission: null },
+        { label: 'Licencias', to: '/licenses', icon: KeyRound, permission: null },
       ],
     },
     {

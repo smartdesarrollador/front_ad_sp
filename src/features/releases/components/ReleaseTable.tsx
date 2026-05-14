@@ -8,10 +8,15 @@ const PLATFORM_LABELS: Record<string, string> = {
   linux: 'Linux',
 }
 
+const APP_TYPE_BADGE: Record<string, { label: string; cls: string }> = {
+  tauri: { label: 'Tauri', cls: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' },
+  sidebar: { label: 'Offline', cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' },
+}
+
 function SkeletonRow() {
   return (
     <tr>
-      {Array.from({ length: 8 }).map((_, i) => (
+      {Array.from({ length: 9 }).map((_, i) => (
         <td key={i} className="px-4 py-3">
           <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
         </td>
@@ -40,7 +45,7 @@ export function ReleaseTable({
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-gray-200 dark:border-gray-700">
-            {['Versión', 'Plataforma', 'Archivo', 'Tamaño', 'Estado', 'Descargas', 'Fecha', 'Acciones'].map(
+            {['Versión', 'App', 'Plataforma', 'Archivo', 'Tamaño', 'Estado', 'Descargas', 'Fecha', 'Acciones'].map(
               (col) => (
                 <th
                   key={col}
@@ -57,7 +62,7 @@ export function ReleaseTable({
 
           {!isLoading && releases.length === 0 && (
             <tr>
-              <td colSpan={8} className="px-4 py-10 text-center text-gray-500 dark:text-gray-400">
+              <td colSpan={9} className="px-4 py-10 text-center text-gray-500 dark:text-gray-400">
                 No hay releases. Sube el primero con el botón de arriba.
               </td>
             </tr>
@@ -71,6 +76,18 @@ export function ReleaseTable({
               >
                 <td className="px-4 py-3 font-mono font-medium text-gray-900 dark:text-white">
                   {release.version}
+                </td>
+                <td className="px-4 py-3">
+                  {(() => {
+                    const badge = APP_TYPE_BADGE[release.app_type]
+                    return badge ? (
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${badge.cls}`}>
+                        {badge.label}
+                      </span>
+                    ) : (
+                      <span className="text-gray-500">{release.app_type}</span>
+                    )
+                  })()}
                 </td>
                 <td className="px-4 py-3 text-gray-600 dark:text-gray-300">
                   {PLATFORM_LABELS[release.platform] ?? release.platform}

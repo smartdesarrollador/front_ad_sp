@@ -20,6 +20,7 @@ export function useUploadRelease() {
       const formData = new FormData()
       formData.append('version', data.version)
       formData.append('platform', data.platform)
+      formData.append('app_type', data.app_type)
       formData.append('file', data.file)
       if (data.release_notes) {
         formData.append('release_notes', data.release_notes)

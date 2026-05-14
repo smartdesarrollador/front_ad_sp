@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { FileArchive, Upload, X } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useUploadRelease } from '../hooks/useUploadRelease'
-import type { ReleasePlatform } from '../types'
+import type { ReleaseAppType, ReleasePlatform } from '../types'
 
 const ALLOWED_EXTENSIONS = ['.exe', '.msi', '.dmg']
 const MAX_SIZE_BYTES = 500 * 1024 * 1024
@@ -17,6 +17,9 @@ const schema = z.object({
     .regex(/^\d+\.\d+\.\d+/, 'Formato esperado: 1.0.0'),
   platform: z.enum(['windows', 'macos', 'linux'] as const, {
     error: 'Selecciona una plataforma',
+  }),
+  app_type: z.enum(['tauri', 'sidebar'] as const, {
+    error: 'Selecciona el tipo de app',
   }),
   file: z
     .instanceof(File, { message: 'Selecciona un archivo' })
@@ -81,6 +84,7 @@ export function UploadReleaseModal({ isOpen, onClose }: UploadReleaseModalProps)
       {
         version: values.version,
         platform: values.platform as ReleasePlatform,
+        app_type: values.app_type as ReleaseAppType,
         file: values.file,
         release_notes: values.release_notes,
       },
@@ -134,7 +138,7 @@ export function UploadReleaseModal({ isOpen, onClose }: UploadReleaseModalProps)
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Versión <span className="text-red-500">*</span>
@@ -174,6 +178,26 @@ export function UploadReleaseModal({ isOpen, onClose }: UploadReleaseModalProps)
                 {errors.platform && (
                   <p className="mt-1 text-xs text-red-600 dark:text-red-400">
                     {errors.platform.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  App <span className="text-red-500">*</span>
+                </label>
+                <select
+                  {...register('app_type')}
+                  aria-label="Seleccionar tipo de app"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                >
+                  <option value="">Seleccionar...</option>
+                  <option value="tauri">Tauri Desktop</option>
+                  <option value="sidebar">Sidebar Offline</option>
+                </select>
+                {errors.app_type && (
+                  <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                    {errors.app_type.message}
                   </p>
                 )}
               </div>

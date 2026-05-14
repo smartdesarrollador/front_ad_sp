@@ -1,9 +1,11 @@
 export type ReleasePlatform = 'windows' | 'macos' | 'linux'
+export type ReleaseAppType = 'tauri' | 'sidebar'
 
 export interface DesktopRelease {
   id: string
   version: string
   platform: ReleasePlatform
+  app_type: ReleaseAppType
   file_url: string
   file_name: string
   file_size: number
@@ -19,6 +21,7 @@ export interface DesktopRelease {
 export interface CreateReleaseRequest {
   version: string
   platform: ReleasePlatform
+  app_type: ReleaseAppType
   file: File
   release_notes?: string
 }
