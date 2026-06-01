@@ -19,6 +19,8 @@ export interface Tenant {
   name: string
   subdomain: string
   plan: string
+  logo_url?: string | null
+  favicon_url?: string | null
 }
 
 export interface LoginRequest {

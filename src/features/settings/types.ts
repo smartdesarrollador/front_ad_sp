@@ -17,6 +17,8 @@ export interface MFASetupResponse {
 export interface OrganizationUpdateRequest {
   name: string
   primary_color: string
+  logo?: File | null
+  favicon?: File | null
 }
 
 export interface NotificationPreferences {

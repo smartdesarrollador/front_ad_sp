@@ -8,11 +8,31 @@ export function useUpdateOrganization() {
   const tenant = useAuthStore((s) => s.tenant)
 
   return useMutation({
-    mutationFn: (data: OrganizationUpdateRequest) =>
-      apiClient.patch('/admin/organization/', data).then((r) => r.data),
-    onSuccess: (_data, variables) => {
+    mutationFn: (data: OrganizationUpdateRequest) => {
+      if (data.logo || data.favicon) {
+        const fd = new FormData()
+        fd.append('name', data.name)
+        fd.append('primary_color', data.primary_color)
+        if (data.logo)    fd.append('logo', data.logo)
+        if (data.favicon) fd.append('favicon', data.favicon)
+        return apiClient
+          .patch('/admin/organization/', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+          .then((r) => r.data)
+      }
+      return apiClient
+        .patch('/admin/organization/', { name: data.name, primary_color: data.primary_color })
+        .then((r) => r.data)
+    },
+    onSuccess: (data) => {
       if (tenant) {
-        setTenant({ ...tenant, name: variables.name })
+        const updated = {
+          ...tenant,
+          name: data.name,
+          logo_url: data.logo_url ?? tenant.logo_url,
+          favicon_url: data.favicon_url ?? tenant.favicon_url,
+        }
+        setTenant(updated)
+        localStorage.setItem('authTenant', JSON.stringify(updated))
       }
     },
   })
