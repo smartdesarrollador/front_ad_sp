@@ -16,7 +16,7 @@ export function useUpdateOrganization() {
         if (data.logo)    fd.append('logo', data.logo)
         if (data.favicon) fd.append('favicon', data.favicon)
         return apiClient
-          .patch('/admin/organization/', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+          .patch('/admin/organization/', fd, { timeout: 60_000 })
           .then((r) => r.data)
       }
       return apiClient
