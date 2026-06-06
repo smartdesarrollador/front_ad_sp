@@ -22,12 +22,12 @@ function NotificationsTab() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold text-gray-900">Notificaciones</h2>
-        <p className="text-sm text-gray-500">Configura qué notificaciones deseas recibir.</p>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Notificaciones</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Configura qué notificaciones deseas recibir.</p>
       </div>
 
-      <div className="rounded-lg border border-gray-200 p-5 space-y-4">
-        <h3 className="text-sm font-medium text-gray-900">Categorías</h3>
+      <div className="rounded-lg border border-gray-200 p-5 space-y-4 dark:border-gray-700">
+        <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">Categorías</h3>
 
         <div className="space-y-3">
           {/* Security - always enabled */}
@@ -37,12 +37,12 @@ function NotificationsTab() {
                 type="checkbox"
                 checked={prefs.security}
                 disabled
-                className="h-4 w-4 rounded border-gray-300 text-primary-600"
+                className="h-4 w-4 rounded border-gray-300 text-primary-600 dark:border-gray-600"
               />
-              <span className="text-sm text-gray-700">Seguridad</span>
-              <Lock className="h-3 w-3 text-gray-400" aria-label="Siempre habilitado" />
+              <span className="text-sm text-gray-700 dark:text-gray-300">Seguridad</span>
+              <Lock className="h-3 w-3 text-gray-400 dark:text-gray-500" aria-label="Siempre habilitado" />
             </div>
-            <span className="text-xs text-gray-400">Siempre activo</span>
+            <span className="text-xs text-gray-400 dark:text-gray-500">Siempre activo</span>
           </label>
 
           {/* Billing */}
@@ -51,9 +51,9 @@ function NotificationsTab() {
               type="checkbox"
               checked={prefs.billing}
               onChange={(e) => setPrefs((p) => ({ ...p, billing: e.target.checked }))}
-              className="h-4 w-4 rounded border-gray-300 text-primary-600"
+              className="h-4 w-4 rounded border-gray-300 text-primary-600 dark:border-gray-600"
             />
-            <span className="text-sm text-gray-700">Facturación</span>
+            <span className="text-sm text-gray-700 dark:text-gray-300">Facturación</span>
           </label>
 
           {/* Team */}
@@ -62,10 +62,10 @@ function NotificationsTab() {
               type="checkbox"
               checked={prefs.team}
               onChange={(e) => setPrefs((p) => ({ ...p, team: e.target.checked }))}
-              className="h-4 w-4 rounded border-gray-300 text-primary-600"
+              className="h-4 w-4 rounded border-gray-300 text-primary-600 dark:border-gray-600"
             />
-            <span className="text-sm text-gray-700">Equipo</span>
-          </label>
+            <span className="text-sm text-gray-700 dark:text-gray-300">Equipo</span>
+        </label>
 
           {/* Marketing */}
           <label className="flex items-center gap-2 cursor-pointer">
@@ -73,15 +73,15 @@ function NotificationsTab() {
               type="checkbox"
               checked={prefs.marketing}
               onChange={(e) => setPrefs((p) => ({ ...p, marketing: e.target.checked }))}
-              className="h-4 w-4 rounded border-gray-300 text-primary-600"
+              className="h-4 w-4 rounded border-gray-300 text-primary-600 dark:border-gray-600"
             />
-            <span className="text-sm text-gray-700">Marketing y novedades</span>
+            <span className="text-sm text-gray-700 dark:text-gray-300">Marketing y novedades</span>
           </label>
         </div>
       </div>
 
-      <div className="rounded-lg border border-gray-200 p-5 space-y-4">
-        <h3 className="text-sm font-medium text-gray-900">Canal de notificaciones</h3>
+      <div className="rounded-lg border border-gray-200 p-5 space-y-4 dark:border-gray-700">
+        <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">Canal de notificaciones</h3>
 
         <div className="space-y-2">
           {[
@@ -96,16 +96,16 @@ function NotificationsTab() {
                 value={opt.value}
                 checked={prefs.channel === opt.value}
                 onChange={() => setPrefs((p) => ({ ...p, channel: opt.value as NotificationPreferences['channel'] }))}
-                className="h-4 w-4 border-gray-300 text-primary-600"
+                className="h-4 w-4 border-gray-300 text-primary-600 dark:border-gray-600"
               />
-              <span className="text-sm text-gray-700">{opt.label}</span>
+              <span className="text-sm text-gray-700 dark:text-gray-300">{opt.label}</span>
             </label>
           ))}
         </div>
       </div>
 
       {saved && (
-        <p className="text-sm text-green-600">Preferencias guardadas.</p>
+        <p className="text-sm text-green-600 dark:text-green-400">Preferencias guardadas.</p>
       )}
 
       <div>

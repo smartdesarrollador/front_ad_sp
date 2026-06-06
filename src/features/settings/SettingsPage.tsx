@@ -29,7 +29,7 @@ function SettingsPage() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Configuración</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Configuración</h1>
 
       <div className="flex gap-6">
         {/* Vertical tab nav */}
@@ -43,8 +43,8 @@ function SettingsPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   isActive
-                    ? 'bg-primary-50 text-primary-700 border-l-2 border-primary-600'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    ? 'bg-primary-50 text-primary-700 border-l-2 border-primary-600 dark:bg-primary-900/20 dark:text-primary-300 dark:border-primary-500'
+                    : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700'
                 }`}
               >
                 <Icon className="h-4 w-4 flex-shrink-0" />
@@ -55,7 +55,7 @@ function SettingsPage() {
         </nav>
 
         {/* Content area */}
-        <div className="flex-1 min-w-0 rounded-lg border border-gray-200 bg-white p-6">
+        <div className="flex-1 min-w-0 rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
           {activeTab === 'profile' && <ProfileTab />}
           {activeTab === 'security' && <SecurityTab />}
           {activeTab === 'organization' && isAdmin && <OrganizationTab />}
