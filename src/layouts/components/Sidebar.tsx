@@ -16,6 +16,7 @@ import {
   Package,
   MonitorDown,
   KeyRound,
+  Smartphone,
   type LucideIcon,
 } from 'lucide-react'
 import { useUiStore } from '@/store/uiStore'
@@ -72,6 +73,7 @@ function Sidebar() {
       group: t('sections.system'),
       items: [
         { label: 'Soporte', to: '/support', icon: HelpCircle, permission: null },
+        { label: 'Pagos Yape', to: '/yape', icon: Smartphone, permission: null },
         { label: t('menu.settings'), to: '/settings', icon: Settings, permission: null },
       ],
     },
