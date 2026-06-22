@@ -18,6 +18,7 @@ import {
   KeyRound,
   Smartphone,
   BookOpen,
+  PanelBottom,
   type LucideIcon,
 } from 'lucide-react'
 import { useUiStore } from '@/store/uiStore'
@@ -75,7 +76,8 @@ function Sidebar() {
       items: [
         { label: 'Soporte', to: '/support', icon: HelpCircle, permission: null },
         { label: 'Pagos Yape', to: '/yape', icon: Smartphone, permission: null },
-        { label: 'Base de Conocimiento', to: '/knowledge-base', icon: BookOpen, permission: null },
+        { label: 'Base de Conocimiento', to: '/knowledge-base', icon: BookOpen,      permission: null },
+        { label: 'Footer del Hub',        to: '/footer',         icon: PanelBottom,   permission: null },
         { label: t('menu.settings'), to: '/settings', icon: Settings, permission: null },
       ],
     },

@@ -100,6 +100,11 @@ export const router = createBrowserRouter([
                   import('@/pages/KnowledgeBasePage').then((m) => ({ Component: m.default })),
               },
               {
+                path: 'footer',
+                lazy: () =>
+                  import('@/pages/FooterPage').then((m) => ({ Component: m.default })),
+              },
+              {
                 path: 'settings',
                 lazy: () =>
                   import('@/pages/SettingsPage').then((m) => ({ Component: m.default })),
