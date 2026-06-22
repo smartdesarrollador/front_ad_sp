@@ -19,6 +19,7 @@ import {
   Smartphone,
   BookOpen,
   PanelBottom,
+  Mail,
   type LucideIcon,
 } from 'lucide-react'
 import { useUiStore } from '@/store/uiStore'
@@ -74,7 +75,8 @@ function Sidebar() {
     {
       group: t('sections.system'),
       items: [
-        { label: 'Soporte', to: '/support', icon: HelpCircle, permission: null },
+        { label: 'Mensajes de Contacto', to: '/contact', icon: Mail,      permission: null },
+        { label: 'Soporte',              to: '/support', icon: HelpCircle, permission: null },
         { label: 'Pagos Yape', to: '/yape', icon: Smartphone, permission: null },
         { label: 'Base de Conocimiento', to: '/knowledge-base', icon: BookOpen,      permission: null },
         { label: 'Footer del Hub',        to: '/footer',         icon: PanelBottom,   permission: null },

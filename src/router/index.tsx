@@ -105,6 +105,11 @@ export const router = createBrowserRouter([
                   import('@/pages/FooterPage').then((m) => ({ Component: m.default })),
               },
               {
+                path: 'contact',
+                lazy: () =>
+                  import('@/pages/ContactPage').then((m) => ({ Component: m.default })),
+              },
+              {
                 path: 'settings',
                 lazy: () =>
                   import('@/pages/SettingsPage').then((m) => ({ Component: m.default })),
