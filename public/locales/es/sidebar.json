@@ -12,7 +12,8 @@
     "settings": "Configuración",
     "reports": "Reportes",
     "notifications": "Notificaciones",
-    "billing": "Facturación"
+    "billing": "Facturación",
+    "catalog": "Catálogo"
   },
   "upgrade": {
     "title": "¿Necesitas más usuarios?",

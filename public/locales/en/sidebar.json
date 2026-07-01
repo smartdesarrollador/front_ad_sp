@@ -12,7 +12,8 @@
     "settings": "Settings",
     "reports": "Reports",
     "notifications": "Notifications",
-    "billing": "Billing"
+    "billing": "Billing",
+    "catalog": "Catalog"
   },
   "upgrade": {
     "title": "Need more users?",
