@@ -21,6 +21,7 @@ import {
   PanelBottom,
   Mail,
   Layers,
+  Megaphone,
   type LucideIcon,
 } from 'lucide-react'
 import { useUiStore } from '@/store/uiStore'
@@ -60,6 +61,7 @@ function Sidebar() {
         { label: t('menu.clients'), to: '/clients', icon: Building2, permission: null },
         { label: t('menu.promotions'), to: '/promotions', icon: Tag, permission: null },
         { label: t('menu.catalog'), to: '/catalog', icon: Layers, permission: null },
+        { label: t('menu.announcements'), to: '/announcements', icon: Megaphone, permission: null },
         { label: t('menu.analytics'), to: '/reports', icon: BarChart3, permission: 'analytics.read' },
         { label: t('menu.audit'), to: '/audit', icon: FileText, permission: 'audit.read' },
       ],

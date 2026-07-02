@@ -115,6 +115,11 @@ export const router = createBrowserRouter([
                   import('@/pages/CatalogPage').then((m) => ({ Component: m.default })),
               },
               {
+                path: 'announcements',
+                lazy: () =>
+                  import('@/pages/AnnouncementsPage').then((m) => ({ Component: m.default })),
+              },
+              {
                 path: 'settings',
                 lazy: () =>
                   import('@/pages/SettingsPage').then((m) => ({ Component: m.default })),

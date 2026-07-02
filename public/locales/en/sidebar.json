@@ -13,7 +13,8 @@
     "reports": "Reports",
     "notifications": "Notifications",
     "billing": "Billing",
-    "catalog": "Catalog"
+    "catalog": "Catalog",
+    "announcements": "Announcements"
   },
   "upgrade": {
     "title": "Need more users?",
