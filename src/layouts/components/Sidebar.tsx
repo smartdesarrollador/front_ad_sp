@@ -1,12 +1,10 @@
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   LayoutDashboard,
   Users,
   Shield,
   Key,
-  CreditCard,
-  Receipt,
   Building2,
   BarChart3,
   FileText,
@@ -41,9 +39,8 @@ interface MenuGroup {
 
 function Sidebar() {
   const { t } = useTranslation('sidebar')
-  const navigate = useNavigate()
   const { sidebarOpen } = useUiStore()
-  const { hasPermission, canUpgradePlan } = usePermissions()
+  const { hasPermission } = usePermissions()
 
   const MENU_GROUPS: MenuGroup[] = [
     {
@@ -69,8 +66,6 @@ function Sidebar() {
     {
       group: 'Administración',
       items: [
-        { label: t('menu.subscription'), to: '/subscription', icon: CreditCard, permission: null },
-        { label: t('menu.billing'), to: '/billing', icon: Receipt, permission: null },
         { label: 'Planes', to: '/plans', icon: Package, permission: null },
         { label: 'Desktop App', to: '/releases', icon: MonitorDown, permission: null },
         { label: 'Licencias', to: '/licenses', icon: KeyRound, permission: null },
@@ -142,24 +137,6 @@ function Sidebar() {
             </div>
           ))}
         </nav>
-
-        {/* Upgrade CTA */}
-        {canUpgradePlan && (
-          <div className="p-4 mt-4">
-            <div className="bg-gradient-to-br from-primary-500 to-primary-700 dark:from-primary-600 dark:to-primary-800 rounded-xl p-4 text-white">
-              <h3 className="font-semibold text-sm mb-2">{t('upgrade.title')}</h3>
-              <p className="text-xs text-primary-100 dark:text-primary-200 mb-3">
-                {t('upgrade.description')}
-              </p>
-              <button
-                onClick={() => navigate('/subscription')}
-                className="w-full bg-white dark:bg-gray-700 text-primary-700 dark:text-primary-300 text-xs font-medium py-2 px-3 rounded-lg hover:bg-primary-50 dark:hover:bg-gray-600 transition-colors"
-              >
-                {t('upgrade.button')}
-              </button>
-            </div>
-          </div>
-        )}
       </aside>
     </>
   )

@@ -7,8 +7,8 @@ export function useTicketDetail(ticketId: string | null) {
     queryKey: ['support-ticket', ticketId],
     queryFn: () =>
       apiClient
-        .get<SupportTicketDetail>(`/support/tickets/${ticketId}/`)
-        .then((r) => r.data),
+        .get<{ ticket: SupportTicketDetail }>(`/support/tickets/${ticketId}/`)
+        .then((r) => r.data.ticket),
     enabled: !!ticketId,
   })
 

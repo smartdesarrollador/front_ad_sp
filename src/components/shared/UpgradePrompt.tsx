@@ -22,7 +22,7 @@ function UpgradePrompt({ feature, title, message }: Props) {
         {message ?? 'Actualiza tu plan para acceder a esta función.'}
       </p>
       <button
-        onClick={() => navigate('/subscription')}
+        onClick={() => navigate('/plans')}
         className="btn btn-primary"
       >
         Actualizar plan

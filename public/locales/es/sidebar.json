@@ -6,20 +6,13 @@
     "analytics": "Analytics",
     "roles": "Roles",
     "permissions": "Permisos",
-    "subscription": "Suscripción",
     "promotions": "Promociones",
     "audit": "Auditoría",
     "settings": "Configuración",
     "reports": "Reportes",
     "notifications": "Notificaciones",
-    "billing": "Facturación",
     "catalog": "Catálogo",
     "announcements": "Anuncios"
-  },
-  "upgrade": {
-    "title": "¿Necesitas más usuarios?",
-    "description": "Actualiza a Enterprise para usuarios ilimitados",
-    "button": "Ver planes"
   },
   "sections": {
     "main": "Principal",
