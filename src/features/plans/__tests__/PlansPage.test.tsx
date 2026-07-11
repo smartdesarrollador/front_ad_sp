@@ -14,6 +14,13 @@ const mockPlans: AdminPlan[] = [
     price_annual: 0,
     popular: false,
     highlights: [{ label: 'Hasta 5 usuarios', included: true }],
+    limits: {
+      max_users: 5,
+      storage_gb: 1,
+      max_projects: 2,
+      max_custom_roles: 0,
+      api_calls_per_month: 1000,
+    },
     updated_at: '2026-03-01T00:00:00Z',
   },
   {
@@ -27,6 +34,13 @@ const mockPlans: AdminPlan[] = [
       { label: 'Hasta 25 usuarios', included: true },
       { label: 'SSO/SAML', included: false },
     ],
+    limits: {
+      max_users: 25,
+      storage_gb: 20,
+      max_projects: null,
+      max_custom_roles: 10,
+      api_calls_per_month: 100000,
+    },
     updated_at: '2026-03-01T00:00:00Z',
   },
 ]

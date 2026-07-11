@@ -1,10 +1,12 @@
 import { useEffect } from 'react'
-import { useForm, useFieldArray } from 'react-hook-form'
+import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { X, Plus, Loader2 } from 'lucide-react'
 import { useUpdatePlan } from '../hooks/useUpdatePlan'
 import type { AdminPlan } from '../types'
+
+const limitField = z.number().min(0, 'Debe ser ≥ 0').nullable()
 
 const schema = z.object({
   display_name: z.string().min(2, 'Mínimo 2 caracteres').max(100),
@@ -12,6 +14,13 @@ const schema = z.object({
   price_monthly: z.number({ error: 'Precio requerido' }).min(0, 'Debe ser ≥ 0'),
   price_annual: z.number({ error: 'Precio requerido' }).min(0, 'Debe ser ≥ 0'),
   popular: z.boolean(),
+  limits: z.object({
+    max_users: limitField,
+    storage_gb: limitField,
+    max_projects: limitField,
+    max_custom_roles: limitField,
+    api_calls_per_month: limitField,
+  }),
   highlights: z
     .array(
       z.object({
@@ -24,6 +33,14 @@ const schema = z.object({
 })
 
 type FormData = z.infer<typeof schema>
+
+const LIMIT_FIELDS: { name: keyof FormData['limits']; label: string }[] = [
+  { name: 'max_users', label: 'Usuarios' },
+  { name: 'storage_gb', label: 'Almacenamiento (GB)' },
+  { name: 'max_projects', label: 'Proyectos' },
+  { name: 'max_custom_roles', label: 'Roles personalizados' },
+  { name: 'api_calls_per_month', label: 'Llamadas API/mes' },
+]
 
 interface Props {
   plan: AdminPlan | null
@@ -53,6 +70,7 @@ export function PlanEditModal({ plan, onClose }: Props) {
         price_monthly: plan.price_monthly,
         price_annual: plan.price_annual,
         popular: plan.popular,
+        limits: plan.limits,
         highlights: plan.highlights,
       })
     }
@@ -160,6 +178,56 @@ export function PlanEditModal({ plan, onClose }: Props) {
             <label htmlFor="popular" className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Marcar como "Más popular"
             </label>
+          </div>
+
+          {/* Límites del plan */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Límites del plan
+            </label>
+            <div className="grid grid-cols-2 gap-4">
+              {LIMIT_FIELDS.map(({ name, label }) => (
+                <Controller
+                  key={name}
+                  control={control}
+                  name={`limits.${name}`}
+                  render={({ field }) => {
+                    const isUnlimited = field.value === null
+                    return (
+                      <div>
+                        <span className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
+                          {label}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            min={0}
+                            disabled={isUnlimited}
+                            value={isUnlimited ? '' : field.value ?? ''}
+                            onChange={(e) =>
+                              field.onChange(e.target.value === '' ? 0 : Number(e.target.value))
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:opacity-50"
+                          />
+                          <label className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">
+                            <input
+                              type="checkbox"
+                              checked={isUnlimited}
+                              onChange={(e) => field.onChange(e.target.checked ? null : 0)}
+                              className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                            />
+                            Sin límite
+                          </label>
+                        </div>
+                        {errors.limits?.[name] && (
+                          <p className="text-red-500 text-xs mt-1">{errors.limits[name]?.message}</p>
+                        )}
+                      </div>
+                    )
+                  }}
+                />
+              ))}
+            </div>
           </div>
 
           {/* Highlights */}

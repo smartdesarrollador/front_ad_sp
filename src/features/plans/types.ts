@@ -3,6 +3,14 @@ export interface PlanHighlight {
   included: boolean
 }
 
+export interface PlanLimits {
+  max_users: number | null
+  storage_gb: number | null
+  max_projects: number | null
+  max_custom_roles: number | null
+  api_calls_per_month: number | null
+}
+
 export interface AdminPlan {
   id: 'free' | 'starter' | 'professional' | 'enterprise'
   display_name: string
@@ -11,6 +19,7 @@ export interface AdminPlan {
   price_annual: number
   popular: boolean
   highlights: PlanHighlight[]
+  limits: PlanLimits
   updated_at: string
 }
 
@@ -21,4 +30,5 @@ export interface PlanUpdateRequest {
   price_annual?: number
   popular?: boolean
   highlights?: PlanHighlight[]
+  limits?: PlanLimits
 }
