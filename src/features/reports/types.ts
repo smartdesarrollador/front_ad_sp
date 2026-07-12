@@ -32,3 +32,42 @@ export interface TrendsData {
   period: string
   data: TrendPoint[]
 }
+
+export interface ServiceAdoptionItem {
+  service: string
+  name: string
+  acquired: number
+  activated: number
+  activation_rate: number
+}
+
+export interface ServiceAdoptionData {
+  services: ServiceAdoptionItem[]
+}
+
+export interface VistaTrafficServiceItem {
+  service: string
+  views: number
+  unique_views: number
+  shares: number
+}
+
+export interface VistaTrafficReferrer {
+  source: string
+  visits: number
+}
+
+export interface VistaTrafficData {
+  period_days: number
+  services: VistaTrafficServiceItem[]
+  referrers: VistaTrafficReferrer[]
+}
+
+export interface DesktopLicenseFunnelData {
+  total: number
+  sent: number
+  activated: number
+  pending: number
+  revoked: number
+  activation_rate: number
+}

@@ -5,7 +5,7 @@ import type { SummaryData } from '../types'
 export function useSummary() {
   const { data: summary, isLoading } = useQuery({
     queryKey: ['reports-summary'],
-    queryFn: () => apiClient.get<SummaryData>('/reports/summary/').then((r) => r.data),
+    queryFn: () => apiClient.get<SummaryData>('/admin/reports/summary/').then((r) => r.data),
     staleTime: 5 * 60 * 1000,
   })
 

@@ -7,11 +7,17 @@ import { useFeatureGate } from '@/hooks/useFeatureGate'
 import { useSummary } from '../hooks/useSummary'
 import { useUsageReport } from '../hooks/useUsageReport'
 import { useTrends } from '../hooks/useTrends'
+import { useServiceAdoption } from '../hooks/useServiceAdoption'
+import { useVistaTraffic } from '../hooks/useVistaTraffic'
+import { useDesktopLicenseFunnel } from '../hooks/useDesktopLicenseFunnel'
 
 vi.mock('@/hooks/useFeatureGate')
 vi.mock('../hooks/useSummary')
 vi.mock('../hooks/useUsageReport')
 vi.mock('../hooks/useTrends')
+vi.mock('../hooks/useServiceAdoption')
+vi.mock('../hooks/useVistaTraffic')
+vi.mock('../hooks/useDesktopLicenseFunnel')
 
 const mockSummary = {
   total_users: 100,
@@ -31,6 +37,39 @@ const mockUsage = {
   ],
   top_permissions: [],
   monthly_growth: [],
+}
+
+const mockAdoption = {
+  services: [
+    { service: 'workspace', name: 'Workspace', acquired: 10, activated: 7, activation_rate: 70.0 },
+    { service: 'vista', name: 'Vista', acquired: 10, activated: 4, activation_rate: 40.0 },
+    { service: 'desktop', name: 'Desktop App', acquired: 10, activated: 2, activation_rate: 20.0 },
+  ],
+}
+
+const mockVistaTraffic = {
+  period_days: 30,
+  services: [
+    { service: 'tarjeta', views: 120, unique_views: 80, shares: 5 },
+    { service: 'landing', views: 40, unique_views: 30, shares: 1 },
+    { service: 'portafolio', views: 0, unique_views: 0, shares: 0 },
+    { service: 'cv', views: 15, unique_views: 12, shares: 0 },
+  ],
+  referrers: [
+    { source: 'google.com', visits: 42 },
+    { source: 'linkedin.com', visits: 18 },
+  ],
+}
+
+// Numbers chosen to avoid colliding with mockSummary's exact-text assertions
+// ('8', '5', '$29.00', 'de 100 totales') in other tests via getByText.
+const mockDesktopFunnel = {
+  total: 50,
+  sent: 32,
+  activated: 19,
+  pending: 9,
+  revoked: 4,
+  activation_rate: 59.4,
 }
 
 const mockFeatureGateAll = {
@@ -58,6 +97,9 @@ describe('ReportsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(useTrends).mockReturnValue({ trends: undefined, isLoading: false })
+    vi.mocked(useServiceAdoption).mockReturnValue({ adoption: mockAdoption, isLoading: false })
+    vi.mocked(useVistaTraffic).mockReturnValue({ vistaTraffic: mockVistaTraffic, isLoading: false })
+    vi.mocked(useDesktopLicenseFunnel).mockReturnValue({ desktopFunnel: mockDesktopFunnel, isLoading: false })
   })
 
   it('renders KPI cards with correct data', () => {
@@ -73,17 +115,63 @@ describe('ReportsPage', () => {
     expect(screen.getByText('5')).toBeInTheDocument()
   })
 
-  it('shows UpgradePrompt for the entire page on free plan (analytics feature off)', () => {
+  it('renders KPIs unconditionally and shows UpgradePrompt only for charts on free plan', () => {
     vi.mocked(useFeatureGate).mockReturnValue({
       ...mockFeatureGateAll,
       hasFeature: () => false,
     })
-    vi.mocked(useSummary).mockReturnValue({ summary: undefined, isLoading: false })
-    vi.mocked(useUsageReport).mockReturnValue({ usage: undefined, isLoading: false })
+    vi.mocked(useSummary).mockReturnValue({ summary: mockSummary, isLoading: false })
+    vi.mocked(useUsageReport).mockReturnValue({ usage: mockUsage, isLoading: false })
 
     renderPage()
 
+    // KPIs are cross-tenant platform metrics (staff-only), not gated by the
+    // current tenant's plan — they must render even when hasFeature() is false.
+    expect(screen.getByText('$29.00')).toBeInTheDocument()
+    // Service adoption and Vista traffic are the same kind of staff-only
+    // cross-tenant data — must render even when hasFeature() is false.
+    expect(screen.getByText('Adopción de Servicios')).toBeInTheDocument()
+    expect(screen.getByText('Tráfico de Vista')).toBeInTheDocument()
+    expect(screen.getByText('Licencias Desktop')).toBeInTheDocument()
+    // Charts/export section is still plan-gated.
     expect(screen.getByText(/actualizar plan/i)).toBeInTheDocument()
+  })
+
+  it('shows "Sin datos disponibles" when there is no service adoption data', () => {
+    vi.mocked(useFeatureGate).mockReturnValue(mockFeatureGateAll)
+    vi.mocked(useSummary).mockReturnValue({ summary: mockSummary, isLoading: false })
+    vi.mocked(useUsageReport).mockReturnValue({ usage: mockUsage, isLoading: false })
+    vi.mocked(useServiceAdoption).mockReturnValue({ adoption: { services: [] }, isLoading: false })
+
+    renderPage()
+
+    expect(screen.getByText('Sin datos disponibles')).toBeInTheDocument()
+  })
+
+  it('shows "Sin datos disponibles" when there is no vista traffic data', () => {
+    vi.mocked(useFeatureGate).mockReturnValue(mockFeatureGateAll)
+    vi.mocked(useSummary).mockReturnValue({ summary: mockSummary, isLoading: false })
+    vi.mocked(useUsageReport).mockReturnValue({ usage: mockUsage, isLoading: false })
+    // useServiceAdoption keeps its non-empty default so only the Vista Traffic
+    // widgets (chart + referrer list) render the empty state — both use the
+    // same "Sin datos disponibles" text, so expect two matches, not one.
+    vi.mocked(useVistaTraffic).mockReturnValue({
+      vistaTraffic: {
+        period_days: 30,
+        services: [
+          { service: 'tarjeta', views: 0, unique_views: 0, shares: 0 },
+          { service: 'landing', views: 0, unique_views: 0, shares: 0 },
+          { service: 'portafolio', views: 0, unique_views: 0, shares: 0 },
+          { service: 'cv', views: 0, unique_views: 0, shares: 0 },
+        ],
+        referrers: [],
+      },
+      isLoading: false,
+    })
+
+    renderPage()
+
+    expect(screen.getAllByText('Sin datos disponibles').length).toBeGreaterThanOrEqual(2)
   })
 
   it('shows KPIs but UpgradePrompt for trends on starter plan', () => {
@@ -107,6 +195,9 @@ describe('ReportsPage', () => {
     vi.mocked(useFeatureGate).mockReturnValue(mockFeatureGateAll)
     vi.mocked(useSummary).mockReturnValue({ summary: undefined, isLoading: true })
     vi.mocked(useUsageReport).mockReturnValue({ usage: undefined, isLoading: true })
+    vi.mocked(useServiceAdoption).mockReturnValue({ adoption: undefined, isLoading: true })
+    vi.mocked(useVistaTraffic).mockReturnValue({ vistaTraffic: undefined, isLoading: true })
+    vi.mocked(useDesktopLicenseFunnel).mockReturnValue({ desktopFunnel: undefined, isLoading: true })
 
     const { container } = renderPage()
 
