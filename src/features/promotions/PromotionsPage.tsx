@@ -26,10 +26,8 @@ export default function PromotionsPage() {
   const [statusFilter, setStatusFilter] = useState<PromotionStatus | 'all'>('all')
   const [typeFilter, setTypeFilter] = useState<PromotionType | 'all'>('all')
 
-  const canCreate = hasPermission('promotions.create')
-  const canUpdate = hasPermission('promotions.update')
-  const canDelete = hasPermission('promotions.delete')
-  const canViewStats = hasPermission('promotions.stats')
+  // El backend gatea todo el CRUD con un único permiso RBAC: promotions.manage
+  const canManage = hasPermission('promotions.manage')
 
   const handleEdit = (promotion: Promotion) => {
     setEditPromotion(promotion)
@@ -53,6 +51,27 @@ export default function PromotionsPage() {
     if (window.confirm(`¿Deseas ${label} la promoción "${promotion.code}"?`)) {
       updatePromotion({ id: promotion.id, status: newStatus })
     }
+  }
+
+  const handleDelete = (id: string) => {
+    const promotion = promotions.find((p) => p.id === id)
+    deletePromotion(id, {
+      onError: (err) => {
+        const status = (err as { response?: { status?: number } }).response?.status
+        if (status === 409) {
+          // Tiene canjes registrados: el backend no permite borrarla
+          if (
+            window.confirm(
+              `La promoción "${promotion?.code ?? ''}" tiene canjes registrados y no puede eliminarse. ¿Deseas pausarla en su lugar?`,
+            )
+          ) {
+            updatePromotion({ id, status: 'paused' })
+          }
+        } else {
+          window.alert('No se pudo eliminar la promoción. Intenta de nuevo.')
+        }
+      },
+    })
   }
 
   const filtered = useMemo(() => {
@@ -87,7 +106,7 @@ export default function PromotionsPage() {
               : `${promotions.length} promociones · ${summary.active} activas`}
           </p>
         </div>
-        {canCreate && (
+        {canManage && (
           <button
             onClick={handleNewPromotion}
             className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-md hover:bg-blue-700"
@@ -154,7 +173,6 @@ export default function PromotionsPage() {
           <option value="all">Todos los tipos</option>
           <option value="percentage">Porcentaje</option>
           <option value="fixed_amount">Monto fijo</option>
-          <option value="trial_extension">Extensión trial</option>
         </select>
       </div>
 
@@ -191,12 +209,12 @@ export default function PromotionsPage() {
               key={promotion.id}
               promotion={promotion}
               onEdit={handleEdit}
-              onDelete={deletePromotion}
+              onDelete={handleDelete}
               onToggle={handleToggle}
               onViewStats={setStatsPromotion}
-              canUpdate={canUpdate}
-              canDelete={canDelete}
-              canViewStats={canViewStats}
+              canUpdate={canManage}
+              canDelete={canManage}
+              canViewStats={canManage}
             />
           ))}
         </div>

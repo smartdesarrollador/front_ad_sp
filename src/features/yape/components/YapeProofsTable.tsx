@@ -108,6 +108,16 @@ export function YapeProofsTable({
                       <span className="text-sm font-mono text-gray-900 dark:text-white">
                         ${proof.amount}
                       </span>
+                      {proof.promo && (
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <span className="text-xs font-mono text-gray-400 line-through">
+                            ${proof.promo.original_amount}
+                          </span>
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
+                            {proof.promo.code}
+                          </span>
+                        </div>
+                      )}
                     </td>
 
                     {/* Estado */}

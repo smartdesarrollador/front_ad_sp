@@ -43,3 +43,13 @@ export interface PromotionUpdateRequest extends Partial<PromotionCreateRequest> 
   id: string
   status?: PromotionStatus
 }
+
+export interface PromotionStats {
+  total_redemptions: number
+  confirmed: number
+  pending: number
+  released: number
+  total_discount: number
+  total_revenue: number
+  by_plan: { plan: string; count: number }[]
+}

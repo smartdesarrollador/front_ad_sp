@@ -7,14 +7,15 @@ import { useCreatePromotion } from '../hooks/useCreatePromotion'
 import { useUpdatePromotion } from '../hooks/useUpdatePromotion'
 import type { Promotion } from '../types'
 
-const PLANS = ['free', 'starter', 'professional', 'enterprise']
+// Solo planes de pago: el backend rechaza 'free' en applicable_plans
+const PLANS = ['starter', 'professional', 'enterprise']
 const PLAN_LABELS: Record<string, string> = {
-  free: 'Free',
   starter: 'Starter',
   professional: 'Professional',
   enterprise: 'Enterprise',
 }
 
+// v1 solo soporta percentage y fixed_amount ('trial_extension' es fase posterior)
 const schema = z
   .object({
     code: z
@@ -24,10 +25,10 @@ const schema = z
       .regex(/^[A-Z0-9]+$/, 'Solo mayúsculas y números'),
     name: z.string().min(3, 'Mínimo 3 caracteres'),
     description: z.string().optional(),
-    type: z.enum(['percentage', 'fixed_amount', 'trial_extension']),
+    type: z.enum(['percentage', 'fixed_amount']),
     value: z.number({ error: 'Ingresa un número' }).positive('Debe ser positivo'),
     max_discount: z.number().min(0).optional().nullable(),
-    applicable_plans: z.array(z.string()),
+    applicable_plans: z.array(z.string()).min(1, 'Selecciona al menos un plan'),
     new_customers_only: z.boolean(),
     starts_at: z.string().min(1, 'Requerido'),
     expires_at: z.string().min(1, 'Requerido'),
@@ -49,16 +50,16 @@ const schema = z
         path: ['value'],
       })
     }
-    if (data.type === 'trial_extension' && (data.value < 1 || data.value > 90)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'El valor debe estar entre 1 y 90 días',
-        path: ['value'],
-      })
-    }
   })
 
 type FormValues = z.infer<typeof schema>
+
+interface BackendErrorShape {
+  response?: {
+    status?: number
+    data?: { error?: { message?: string; details?: Record<string, unknown> } }
+  }
+}
 
 interface PromotionModalProps {
   promotion: Promotion | null
@@ -77,6 +78,7 @@ export function PromotionModal({ promotion, isOpen, onClose }: PromotionModalPro
     reset,
     watch,
     setValue,
+    setError,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -98,13 +100,14 @@ export function PromotionModal({ promotion, isOpen, onClose }: PromotionModalPro
           code: promotion.code,
           name: promotion.name,
           description: promotion.description,
-          type: promotion.type,
+          type: promotion.type === 'trial_extension' ? 'percentage' : promotion.type,
           value: promotion.value,
           max_discount: promotion.max_discount,
           applicable_plans: promotion.applicable_plans,
           new_customers_only: promotion.new_customers_only,
-          starts_at: promotion.starts_at,
-          expires_at: promotion.expires_at,
+          // el backend devuelve datetime ISO; el input type="date" necesita YYYY-MM-DD
+          starts_at: promotion.starts_at.slice(0, 10),
+          expires_at: promotion.expires_at.slice(0, 10),
           max_uses: promotion.max_uses,
           max_uses_per_customer: promotion.max_uses_per_customer,
         })
@@ -131,8 +134,19 @@ export function PromotionModal({ promotion, isOpen, onClose }: PromotionModalPro
 
   const mutation = isEdit ? updatePromotion : createPromotion
   const isPending = mutation.isPending
-  const error = mutation.error as { response?: { status?: number } } | null
+  const error = mutation.error as BackendErrorShape | null
   const is402 = error?.response?.status === 402
+  const serverMessage = error?.response?.data?.error?.message
+
+  // Mapea los errores 400 por campo del envelope {error:{details}} a react-hook-form
+  const applyBackendErrors = (err: unknown) => {
+    const details = (err as BackendErrorShape).response?.data?.error?.details
+    if (!details) return
+    for (const [field, messages] of Object.entries(details)) {
+      const message = Array.isArray(messages) ? String(messages[0]) : String(messages)
+      setError(field as keyof FormValues, { type: 'server', message })
+    }
+  }
 
   const generateCode = () => {
     const code = Math.random().toString(36).slice(2, 10).toUpperCase()
@@ -149,15 +163,24 @@ export function PromotionModal({ promotion, isOpen, onClose }: PromotionModalPro
   }
 
   const onSubmit = (values: FormValues) => {
+    // el input date entrega YYYY-MM-DD; el backend espera datetime ISO
+    const payload = {
+      ...values,
+      starts_at: `${values.starts_at}T00:00:00Z`,
+      expires_at: `${values.expires_at}T23:59:59Z`,
+    }
     if (isEdit) {
+      // code es inmutable en el backend: nunca va en el PATCH
+      const rest: Partial<typeof payload> = { ...payload }
+      delete rest.code
       updatePromotion.mutate(
-        { id: promotion.id, ...values },
-        { onSuccess: () => { reset(); onClose() } },
+        { id: promotion.id, ...rest },
+        { onSuccess: () => { reset(); onClose() }, onError: applyBackendErrors },
       )
     } else {
       createPromotion.mutate(
-        values,
-        { onSuccess: () => { reset(); onClose() } },
+        payload,
+        { onSuccess: () => { reset(); onClose() }, onError: applyBackendErrors },
       )
     }
   }
@@ -191,7 +214,7 @@ export function PromotionModal({ promotion, isOpen, onClose }: PromotionModalPro
               )}
               {error && !is402 && (
                 <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-3 text-sm text-red-700 dark:text-red-400">
-                  Ocurrió un error. Intenta de nuevo.
+                  {serverMessage ?? 'Ocurrió un error. Intenta de nuevo.'}
                 </div>
               )}
 
@@ -205,16 +228,24 @@ export function PromotionModal({ promotion, isOpen, onClose }: PromotionModalPro
                     {...register('code')}
                     type="text"
                     placeholder="SUMMER2026"
-                    className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white font-mono uppercase"
+                    disabled={isEdit}
+                    className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white font-mono uppercase disabled:opacity-60 disabled:cursor-not-allowed"
                   />
-                  <button
-                    type="button"
-                    onClick={generateCode}
-                    className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 whitespace-nowrap"
-                  >
-                    Generar
-                  </button>
+                  {!isEdit && (
+                    <button
+                      type="button"
+                      onClick={generateCode}
+                      className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 whitespace-nowrap"
+                    >
+                      Generar
+                    </button>
+                  )}
                 </div>
+                {isEdit && (
+                  <p className="mt-1 text-xs text-gray-400">
+                    El código es inmutable tras la creación.
+                  </p>
+                )}
                 {errors.code && (
                   <p className="mt-1 text-xs text-red-600 dark:text-red-400">{errors.code.message}</p>
                 )}
@@ -261,7 +292,6 @@ export function PromotionModal({ promotion, isOpen, onClose }: PromotionModalPro
                   >
                     <option value="percentage">Porcentaje (%)</option>
                     <option value="fixed_amount">Monto fijo ($)</option>
-                    <option value="trial_extension">Extensión trial (+días)</option>
                   </select>
                 </div>
                 <div>
@@ -272,7 +302,7 @@ export function PromotionModal({ promotion, isOpen, onClose }: PromotionModalPro
                     {...register('value', { valueAsNumber: true })}
                     type="number"
                     step="0.01"
-                    placeholder={watchedType === 'percentage' ? '10' : watchedType === 'trial_extension' ? '30' : '50'}
+                    placeholder={watchedType === 'percentage' ? '10' : '50'}
                     className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                   />
                   {errors.value && (
@@ -300,8 +330,7 @@ export function PromotionModal({ promotion, isOpen, onClose }: PromotionModalPro
               {/* Planes aplicables */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Planes aplicables
-                  <span className="ml-1 text-xs font-normal text-gray-400">(vacío = todos)</span>
+                  Planes aplicables <span className="text-red-500">*</span>
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {PLANS.map((plan) => {
@@ -322,6 +351,11 @@ export function PromotionModal({ promotion, isOpen, onClose }: PromotionModalPro
                     )
                   })}
                 </div>
+                {errors.applicable_plans && (
+                  <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                    {errors.applicable_plans.message}
+                  </p>
+                )}
               </div>
 
               {/* Solo nuevos clientes */}

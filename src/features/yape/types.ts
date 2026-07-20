@@ -9,11 +9,19 @@ export interface YapeConfig {
 
 export type YapeProofStatus = 'pending' | 'approved' | 'rejected'
 
+export interface YapeProofPromo {
+  code: string
+  original_amount: string
+  discount_amount: string
+  final_amount: string
+}
+
 export interface YapeProof {
   id: string
   screenshot_url: string
   plan: string
   amount: string
+  promo: YapeProofPromo | null
   status: YapeProofStatus
   tenant_name: string
   tenant_email: string

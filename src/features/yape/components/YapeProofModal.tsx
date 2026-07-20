@@ -104,7 +104,21 @@ export function YapeProofModal({ proof, onClose }: Props) {
                 <DollarSign className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Monto</p>
-                  <p className="text-sm font-medium font-mono text-gray-900 dark:text-white">${proof.amount} USD</p>
+                  {proof.promo ? (
+                    <div className="text-sm font-mono space-y-0.5">
+                      <p className="text-gray-500 dark:text-gray-400">
+                        Plan: ${proof.promo.original_amount}
+                      </p>
+                      <p className="text-purple-600 dark:text-purple-400">
+                        Cupón {proof.promo.code}: −${proof.promo.discount_amount}
+                      </p>
+                      <p className="font-medium text-gray-900 dark:text-white">
+                        Total: ${proof.promo.final_amount} USD
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-sm font-medium font-mono text-gray-900 dark:text-white">${proof.amount} USD</p>
+                  )}
                 </div>
               </div>
 

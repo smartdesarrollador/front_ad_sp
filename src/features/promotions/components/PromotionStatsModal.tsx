@@ -1,6 +1,13 @@
 import { X } from 'lucide-react'
+import { usePromotionStats } from '../hooks/usePromotionStats'
 import type { Promotion } from '../types'
 import { formatValue, STATUS_BADGE_CLASSES, STATUS_BADGE_LABELS } from './PromotionCard'
+
+const PLAN_LABELS: Record<string, string> = {
+  starter: 'Starter',
+  professional: 'Professional',
+  enterprise: 'Enterprise',
+}
 
 interface PromotionStatsModalProps {
   promotion: Promotion | null
@@ -8,6 +15,8 @@ interface PromotionStatsModalProps {
 }
 
 export function PromotionStatsModal({ promotion, onClose }: PromotionStatsModalProps) {
+  const { stats, isLoading: statsLoading } = usePromotionStats(promotion?.id ?? null)
+
   if (promotion === null) return null
 
   return (
@@ -75,6 +84,57 @@ export function PromotionStatsModal({ promotion, onClose }: PromotionStatsModalP
               </div>
             </div>
 
+            {/* Canjes (endpoint stats) */}
+            <div>
+              <p className="text-sm font-semibold text-gray-900 dark:text-white mb-2">Canjes</p>
+              {statsLoading && (
+                <div className="space-y-2 animate-pulse">
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
+                </div>
+              )}
+              {!statsLoading && stats && (
+                <>
+                  <div className="grid grid-cols-3 gap-3 text-center">
+                    <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-2">
+                      <p className="text-lg font-bold text-green-700 dark:text-green-300">
+                        {stats.confirmed}
+                      </p>
+                      <p className="text-xs text-green-600 dark:text-green-400">Confirmados</p>
+                    </div>
+                    <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-2">
+                      <p className="text-lg font-bold text-yellow-700 dark:text-yellow-300">
+                        {stats.pending}
+                      </p>
+                      <p className="text-xs text-yellow-600 dark:text-yellow-400">Pendientes</p>
+                    </div>
+                    <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-2">
+                      <p className="text-lg font-bold text-gray-700 dark:text-gray-300">
+                        {stats.released}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Liberados</p>
+                    </div>
+                  </div>
+                  <div className="mt-2 text-sm">
+                    <span className="text-gray-500 dark:text-gray-400">Descuento otorgado: </span>
+                    <span className="font-medium text-gray-900 dark:text-white">
+                      ${stats.total_discount.toFixed(2)}
+                    </span>
+                  </div>
+                  {stats.by_plan.length > 0 && (
+                    <div className="mt-1 text-sm">
+                      <span className="text-gray-500 dark:text-gray-400">Por plan: </span>
+                      <span className="text-gray-900 dark:text-white">
+                        {stats.by_plan
+                          .map((entry) => `${PLAN_LABELS[entry.plan] ?? entry.plan} (${entry.count})`)
+                          .join(' · ')}
+                      </span>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
             {/* Details */}
             <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
               {promotion.description && (
@@ -92,7 +152,7 @@ export function PromotionStatsModal({ promotion, onClose }: PromotionStatsModalP
               <div>
                 <span className="text-gray-500 dark:text-gray-400">Vigencia: </span>
                 <span className="text-gray-900 dark:text-white">
-                  {promotion.starts_at} → {promotion.expires_at}
+                  {promotion.starts_at.slice(0, 10)} → {promotion.expires_at.slice(0, 10)}
                 </span>
               </div>
               <div>

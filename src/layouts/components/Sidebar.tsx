@@ -56,7 +56,7 @@ function Sidebar() {
         { label: t('menu.roles'), to: '/roles', icon: Shield, permission: 'roles.read' },
         { label: t('menu.permissions'), to: '/permissions', icon: Key, permission: 'roles.read' },
         { label: t('menu.clients'), to: '/clients', icon: Building2, permission: null },
-        { label: t('menu.promotions'), to: '/promotions', icon: Tag, permission: null },
+        { label: t('menu.promotions'), to: '/promotions', icon: Tag, permission: 'promotions.manage' },
         { label: t('menu.catalog'), to: '/catalog', icon: Layers, permission: null },
         { label: t('menu.announcements'), to: '/announcements', icon: Megaphone, permission: null },
         { label: t('menu.analytics'), to: '/reports', icon: BarChart3, permission: 'analytics.read' },
