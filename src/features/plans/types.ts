@@ -9,6 +9,8 @@ export interface PlanLimits {
   max_projects: number | null
   max_custom_roles: number | null
   api_calls_per_month: number | null
+  max_image_upload_mb: number | null
+  max_file_upload_mb: number | null
 }
 
 export interface AdminPlan {

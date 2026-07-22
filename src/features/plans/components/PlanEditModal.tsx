@@ -20,6 +20,8 @@ const schema = z.object({
     max_projects: limitField,
     max_custom_roles: limitField,
     api_calls_per_month: limitField,
+    max_image_upload_mb: limitField,
+    max_file_upload_mb: limitField,
   }),
   highlights: z
     .array(
@@ -40,6 +42,8 @@ const LIMIT_FIELDS: { name: keyof FormData['limits']; label: string }[] = [
   { name: 'max_projects', label: 'Proyectos' },
   { name: 'max_custom_roles', label: 'Roles personalizados' },
   { name: 'api_calls_per_month', label: 'Llamadas API/mes' },
+  { name: 'max_image_upload_mb', label: 'Peso máx. imagen (MB)' },
+  { name: 'max_file_upload_mb', label: 'Peso máx. archivo (MB)' },
 ]
 
 interface Props {

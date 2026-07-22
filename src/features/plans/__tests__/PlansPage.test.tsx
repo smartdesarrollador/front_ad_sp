@@ -20,6 +20,8 @@ const mockPlans: AdminPlan[] = [
       max_projects: 2,
       max_custom_roles: 0,
       api_calls_per_month: 1000,
+      max_image_upload_mb: 2,
+      max_file_upload_mb: 5,
     },
     updated_at: '2026-03-01T00:00:00Z',
   },
@@ -40,6 +42,8 @@ const mockPlans: AdminPlan[] = [
       max_projects: null,
       max_custom_roles: 10,
       api_calls_per_month: 100000,
+      max_image_upload_mb: 10,
+      max_file_upload_mb: 25,
     },
     updated_at: '2026-03-01T00:00:00Z',
   },
@@ -121,6 +125,14 @@ describe('PlansPage', () => {
     const editButtons = screen.getAllByRole('button', { name: /editar plan/i })
     fireEvent.click(editButtons[0])
     expect(screen.getByRole('dialog')).toBeInTheDocument()
+  })
+
+  it('renders upload-limit fields in the edit modal', () => {
+    renderPage()
+    const editButtons = screen.getAllByRole('button', { name: /editar plan/i })
+    fireEvent.click(editButtons[0])
+    expect(screen.getByText('Peso máx. imagen (MB)')).toBeInTheDocument()
+    expect(screen.getByText('Peso máx. archivo (MB)')).toBeInTheDocument()
   })
 
   it('closes edit modal when close button is clicked', async () => {
