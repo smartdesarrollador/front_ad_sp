@@ -36,9 +36,11 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-const LIMIT_FIELDS: { name: keyof FormData['limits']; label: string }[] = [
+// `step` define la granularidad del input. Almacenamiento admite fracciones de GB
+// (0.25 GB = 256 MB); el resto de límites son enteros.
+const LIMIT_FIELDS: { name: keyof FormData['limits']; label: string; step?: number }[] = [
   { name: 'max_users', label: 'Usuarios' },
-  { name: 'storage_gb', label: 'Almacenamiento (GB)' },
+  { name: 'storage_gb', label: 'Almacenamiento (GB)', step: 0.01 },
   { name: 'max_projects', label: 'Proyectos' },
   { name: 'max_custom_roles', label: 'Roles personalizados' },
   { name: 'api_calls_per_month', label: 'Llamadas API/mes' },
@@ -190,7 +192,7 @@ export function PlanEditModal({ plan, onClose }: Props) {
               Límites del plan
             </label>
             <div className="grid grid-cols-2 gap-4">
-              {LIMIT_FIELDS.map(({ name, label }) => (
+              {LIMIT_FIELDS.map(({ name, label, step }) => (
                 <Controller
                   key={name}
                   control={control}
@@ -206,6 +208,7 @@ export function PlanEditModal({ plan, onClose }: Props) {
                           <input
                             type="number"
                             min={0}
+                            step={step ?? 1}
                             disabled={isUnlimited}
                             value={isUnlimited ? '' : field.value ?? ''}
                             onChange={(e) =>
