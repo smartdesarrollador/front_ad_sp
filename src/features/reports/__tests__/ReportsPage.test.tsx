@@ -8,6 +8,7 @@ import { useSummary } from '../hooks/useSummary'
 import { useUsageReport } from '../hooks/useUsageReport'
 import { useTrends } from '../hooks/useTrends'
 import { useServiceAdoption } from '../hooks/useServiceAdoption'
+import { useStorageReport } from '../hooks/useStorageReport'
 import { useVistaTraffic } from '../hooks/useVistaTraffic'
 import { useDesktopLicenseFunnel } from '../hooks/useDesktopLicenseFunnel'
 
@@ -16,6 +17,7 @@ vi.mock('../hooks/useSummary')
 vi.mock('../hooks/useUsageReport')
 vi.mock('../hooks/useTrends')
 vi.mock('../hooks/useServiceAdoption')
+vi.mock('../hooks/useStorageReport')
 vi.mock('../hooks/useVistaTraffic')
 vi.mock('../hooks/useDesktopLicenseFunnel')
 
@@ -79,6 +81,28 @@ const mockFeatureGateAll = {
   isLoading: false,
 }
 
+const mockStorage = {
+  total_used_gb: 7.4,
+  tenant_count: 3,
+  by_plan: [
+    { plan: 'free', plan_name: 'Free', used_gb: 0.9, tenant_count: 1 },
+    { plan: 'starter', plan_name: 'Starter', used_gb: 3.0, tenant_count: 1 },
+    { plan: 'professional', plan_name: 'Professional', used_gb: 0, tenant_count: 0 },
+    { plan: 'enterprise', plan_name: 'Enterprise', used_gb: 3.5, tenant_count: 1 },
+  ],
+  top_tenants: [
+    { tenant: 'Acme Ent', plan: 'enterprise', used_gb: 3.5, limit_gb: null, pct: null },
+    { tenant: 'Acme Starter', plan: 'starter', used_gb: 3.0, limit_gb: 5, pct: 60.0 },
+    { tenant: 'Acme Free', plan: 'free', used_gb: 0.9, limit_gb: 1, pct: 90.0 },
+  ],
+  occupancy: [
+    { bucket: '0-50%', tenant_count: 0 },
+    { bucket: '50-80%', tenant_count: 1 },
+    { bucket: '80-100%', tenant_count: 1 },
+    { bucket: 'unlimited', tenant_count: 1 },
+  ],
+}
+
 function renderPage() {
   const qc = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -98,6 +122,7 @@ describe('ReportsPage', () => {
     vi.clearAllMocks()
     vi.mocked(useTrends).mockReturnValue({ trends: undefined, isLoading: false })
     vi.mocked(useServiceAdoption).mockReturnValue({ adoption: mockAdoption, isLoading: false })
+    vi.mocked(useStorageReport).mockReturnValue({ storage: mockStorage, isLoading: false })
     vi.mocked(useVistaTraffic).mockReturnValue({ vistaTraffic: mockVistaTraffic, isLoading: false })
     vi.mocked(useDesktopLicenseFunnel).mockReturnValue({ desktopFunnel: mockDesktopFunnel, isLoading: false })
   })
@@ -113,6 +138,17 @@ describe('ReportsPage', () => {
     expect(screen.getByText('8')).toBeInTheDocument()
     expect(screen.getByText('de 100 totales')).toBeInTheDocument()
     expect(screen.getByText('5')).toBeInTheDocument()
+  })
+
+  it('renders the tenant storage section with the platform total', () => {
+    vi.mocked(useFeatureGate).mockReturnValue(mockFeatureGateAll)
+    vi.mocked(useSummary).mockReturnValue({ summary: mockSummary, isLoading: false })
+    vi.mocked(useUsageReport).mockReturnValue({ usage: mockUsage, isLoading: false })
+
+    renderPage()
+
+    expect(screen.getByText('Almacenamiento de Tenants')).toBeInTheDocument()
+    expect(screen.getByText('7.4 GB usados · 3 tenants')).toBeInTheDocument()
   })
 
   it('renders KPIs unconditionally and shows UpgradePrompt only for charts on free plan', () => {

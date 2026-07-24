@@ -71,3 +71,31 @@ export interface DesktopLicenseFunnelData {
   revoked: number
   activation_rate: number
 }
+
+export interface StoragePlanRow {
+  plan: string
+  plan_name: string
+  used_gb: number
+  tenant_count: number
+}
+
+export interface StorageTenantRow {
+  tenant: string
+  plan: string
+  used_gb: number
+  limit_gb: number | null
+  pct: number | null
+}
+
+export interface StorageOccupancyRow {
+  bucket: string
+  tenant_count: number
+}
+
+export interface StorageReportData {
+  total_used_gb: number
+  tenant_count: number
+  by_plan: StoragePlanRow[]
+  top_tenants: StorageTenantRow[]
+  occupancy: StorageOccupancyRow[]
+}

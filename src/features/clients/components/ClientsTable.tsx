@@ -15,6 +15,53 @@ const PLAN_NAMES: Record<PlanType, string> = {
   enterprise: 'Enterprise',
 }
 
+/** MB si es < 1 GB (evita "0.0 GB"), GB con 1 decimal en el resto. */
+function formatStorage(gb: number): string {
+  if (gb <= 0) return '0 GB'
+  if (gb < 1) {
+    const mb = gb * 1024
+    return `${mb < 10 ? mb.toFixed(1) : Math.round(mb)} MB`
+  }
+  return `${gb.toFixed(1)} GB`
+}
+
+function StorageUsageCell({ current, limit }: { current: number; limit: number | null }) {
+  if (limit === null) {
+    return (
+      <div className="min-w-[7rem]">
+        <div className="text-gray-600 dark:text-gray-300">{formatStorage(current)}</div>
+        <div className="text-xs text-blue-500 dark:text-blue-400">Ilimitado</div>
+      </div>
+    )
+  }
+
+  const ratio = limit > 0 ? current / limit : current > 0 ? 1 : 0
+  const pct = Math.min(ratio, 1) * 100
+  const barColor =
+    ratio >= 0.9 ? 'bg-red-500' : ratio >= 0.7 ? 'bg-amber-500' : 'bg-green-500'
+
+  return (
+    <div className="min-w-[7rem]">
+      <div className="text-gray-600 dark:text-gray-300 mb-1">
+        {formatStorage(current)}
+        <span className="text-gray-400"> / {formatStorage(limit)}</span>
+      </div>
+      <div
+        className="h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden"
+        role="progressbar"
+        aria-valuenow={Math.round(pct)}
+        aria-valuemin={0}
+        aria-valuemax={100}
+      >
+        <div
+          className={`h-full rounded-full transition-all ${barColor}`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+    </div>
+  )
+}
+
 interface StatusConfig {
   label: string
   icon: React.ComponentType<{ className?: string }>
@@ -63,7 +110,7 @@ function ClientAvatar({ name, primaryColor }: { name: string; primaryColor: stri
 function SkeletonRow() {
   return (
     <tr className="animate-pulse">
-      {Array.from({ length: 7 }).map((_, i) => (
+      {Array.from({ length: 8 }).map((_, i) => (
         <td key={i} className="px-4 py-3">
           <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded" />
         </td>
@@ -90,6 +137,7 @@ export function ClientsTable({ clients, isLoading, canEdit, onView, onSuspend }:
             <th className="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400">Plan</th>
             <th className="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400">Estado</th>
             <th className="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400">Usuarios</th>
+            <th className="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400">Almacenamiento</th>
             <th className="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400">MRR</th>
             <th className="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400">Creado</th>
             <th className="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400">Acciones</th>
@@ -100,7 +148,7 @@ export function ClientsTable({ clients, isLoading, canEdit, onView, onSuspend }:
 
           {!isLoading && clients.length === 0 && (
             <tr>
-              <td colSpan={7} className="px-4 py-10 text-center">
+              <td colSpan={8} className="px-4 py-10 text-center">
                 <div className="flex flex-col items-center gap-2 text-gray-400 dark:text-gray-500">
                   <Building2 className="h-8 w-8" />
                   <span className="text-sm">No se encontraron clientes</span>
@@ -146,6 +194,12 @@ export function ClientsTable({ clients, isLoading, canEdit, onView, onSuspend }:
                     {client.usage.users.limit !== null && (
                       <span className="text-gray-400"> / {client.usage.users.limit}</span>
                     )}
+                  </td>
+                  <td className="px-4 py-3">
+                    <StorageUsageCell
+                      current={client.usage.storage.current_gb}
+                      limit={client.usage.storage.limit_gb}
+                    />
                   </td>
                   <td className="px-4 py-3 text-gray-600 dark:text-gray-300">
                     ${client.subscription.mrr.toLocaleString('es-ES')}

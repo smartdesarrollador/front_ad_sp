@@ -3,11 +3,16 @@ import FeatureGate from '@/components/shared/FeatureGate'
 import { useSummary } from './hooks/useSummary'
 import { useUsageReport } from './hooks/useUsageReport'
 import { useServiceAdoption } from './hooks/useServiceAdoption'
+import { useStorageReport } from './hooks/useStorageReport'
 import { useVistaTraffic } from './hooks/useVistaTraffic'
 import { useDesktopLicenseFunnel } from './hooks/useDesktopLicenseFunnel'
 import { KpiCards } from './components/KpiCards'
 import { UsageTrendsChart } from './components/UsageTrendsChart'
 import { ServiceAdoptionChart } from './components/ServiceAdoptionChart'
+import { StorageByPlanChart } from './components/StorageByPlanChart'
+import { StorageTopTenantsChart } from './components/StorageTopTenantsChart'
+import { StorageOccupancyChart } from './components/StorageOccupancyChart'
+import { formatStorage } from './formatStorage'
 import { VistaTrafficChart } from './components/VistaTrafficChart'
 import { ReferrerList } from './components/ReferrerList'
 import { DesktopLicenseStats } from './components/DesktopLicenseStats'
@@ -27,6 +32,7 @@ export default function ReportsPage() {
   const { summary, isLoading: loadingSummary } = useSummary()
   const { usage, isLoading: loadingUsage } = useUsageReport()
   const { adoption, isLoading: loadingAdoption } = useServiceAdoption()
+  const { storage, isLoading: loadingStorage } = useStorageReport()
   const { vistaTraffic, isLoading: loadingVistaTraffic } = useVistaTraffic()
   const { desktopFunnel, isLoading: loadingDesktopFunnel } = useDesktopLicenseFunnel()
 
@@ -51,6 +57,37 @@ export default function ReportsPage() {
           Adopción de Servicios
         </h3>
         <ServiceAdoptionChart adoption={adoption} isLoading={loadingAdoption} />
+      </div>
+
+      {/* Same reasoning — storage consumed across all tenants (staff-only platform data,
+          not the current tenant's plan; must not sit behind FeatureGate). */}
+      <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6">
+        <div className="flex items-baseline justify-between mb-4">
+          <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+            Almacenamiento de Tenants
+          </h3>
+          {!loadingStorage && storage && (
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              {formatStorage(storage.total_used_gb)} usados · {storage.tenant_count} tenants
+            </span>
+          )}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div>
+            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Por plan</p>
+            <StorageByPlanChart byPlan={storage?.by_plan} isLoading={loadingStorage} />
+          </div>
+          <div>
+            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Top tenants</p>
+            <StorageTopTenantsChart topTenants={storage?.top_tenants} isLoading={loadingStorage} />
+          </div>
+        </div>
+        <div className="mt-6">
+          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+            Ocupación (uso vs. límite)
+          </p>
+          <StorageOccupancyChart occupancy={storage?.occupancy} isLoading={loadingStorage} />
+        </div>
       </div>
 
       {/* Same reasoning — traffic across all tenants' public Vista pages. */}

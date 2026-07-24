@@ -133,6 +133,26 @@ describe('ClientsPage', () => {
     expect(screen.getAllByText('Enterprise').length > 0).toBe(true)
   })
 
+  it('muestra la columna de almacenamiento con barra de color e ilimitado', () => {
+    const clients = [
+      { ...mockClients[0], id: 'a', name: 'Low Co', usage: { ...mockUsage, storage: { current_gb: 1, limit_gb: 5 } } },
+      { ...mockClients[0], id: 'b', name: 'Full Co', usage: { ...mockUsage, storage: { current_gb: 4.8, limit_gb: 5 } } },
+      { ...mockClients[0], id: 'c', name: 'Ent Co', usage: { ...mockUsage, storage: { current_gb: 12, limit_gb: null } } },
+    ]
+    vi.mocked(useClients).mockReturnValue({ clients, isLoading: false })
+
+    renderPage()
+
+    expect(screen.getByText('Almacenamiento')).toBeInTheDocument()
+    expect(screen.getByText('Ilimitado')).toBeInTheDocument()
+    expect(screen.getByText('4.8 GB')).toBeInTheDocument()
+
+    const bars = screen.getAllByRole('progressbar')
+    expect(bars).toHaveLength(2) // el tenant ilimitado (Enterprise) no lleva barra
+    expect(bars.some((b) => b.querySelector('.bg-green-500'))).toBe(true) // 1/5 = 20%
+    expect(bars.some((b) => b.querySelector('.bg-red-500'))).toBe(true) // 4.8/5 = 96%
+  })
+
   it('búsqueda filtra por subdominio', async () => {
     vi.mocked(useClients).mockReturnValue({ clients: mockClients, isLoading: false })
 
