@@ -1,14 +1,20 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { X, Plus, Loader2 } from 'lucide-react'
 import { useUpdatePlan } from '../hooks/useUpdatePlan'
+import {
+  MONTHS_PER_YEAR,
+  annualDiscountPercent,
+  annualSavings,
+  exceedsTwelveMonths,
+} from '../annual-pricing'
 import type { AdminPlan } from '../types'
 
 const limitField = z.number().min(0, 'Debe ser ≥ 0').nullable()
 
-const schema = z.object({
+const baseSchema = z.object({
   display_name: z.string().min(2, 'Mínimo 2 caracteres').max(100),
   description: z.string().max(300).optional(),
   price_monthly: z.number({ error: 'Precio requerido' }).min(0, 'Debe ser ≥ 0'),
@@ -34,7 +40,30 @@ const schema = z.object({
     .max(10, 'Máximo 10 highlights'),
 })
 
-type FormData = z.infer<typeof schema>
+// Espeja la validación del backend (PlanUpdateSerializer.validate) para que el error se
+// vea antes de enviar. El servidor sigue siendo la autoridad — ver el onError del submit.
+const schema = baseSchema.superRefine((data, ctx) => {
+  if (exceedsTwelveMonths(data.price_monthly, data.price_annual)) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['price_annual'],
+      message:
+        `El precio anual ($${data.price_annual}) no puede superar 12 mensualidades ` +
+        `($${data.price_monthly * MONTHS_PER_YEAR}). Ajusta el precio mensual o baja el anual.`,
+    })
+  }
+})
+
+type FormData = z.infer<typeof baseSchema>
+
+/** Mensaje de error de un campo concreto en la respuesta 400 del backend. */
+function backendFieldError(error: unknown, field: string): string | null {
+  const data = (error as { response?: { data?: { error?: Record<string, unknown> } } })
+    .response?.data?.error
+  const detail = data?.[field]
+  if (Array.isArray(detail) && typeof detail[0] === 'string') return detail[0]
+  return typeof detail === 'string' ? detail : null
+}
 
 // `step` define la granularidad del input. Almacenamiento admite fracciones de GB
 // (0.25 GB = 256 MB); el resto de límites son enteros.
@@ -55,16 +84,23 @@ interface Props {
 
 export function PlanEditModal({ plan, onClose }: Props) {
   const updatePlan = useUpdatePlan()
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   const {
     register,
     control,
     handleSubmit,
     reset,
+    setError,
+    watch,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
+
+  const priceMonthly = watch('price_monthly')
+  const priceAnnual = watch('price_annual')
+  const discount = annualDiscountPercent(priceMonthly, priceAnnual)
 
   const { fields, append, remove } = useFieldArray({ control, name: 'highlights' })
 
@@ -85,9 +121,26 @@ export function PlanEditModal({ plan, onClose }: Props) {
   if (!plan) return null
 
   const onSubmit = (data: FormData) => {
+    setSubmitError(null)
     updatePlan.mutate(
       { id: plan.id, data },
-      { onSuccess: onClose },
+      {
+        onSuccess: onClose,
+        // Sin esto el guardado fallido era MUDO: el modal se quedaba abierto sin
+        // mensaje y parecía roto, cuando en realidad el backend había rechazado el
+        // dato (p. ej. el guardarraíl del precio anual).
+        onError: (error) => {
+          const fieldError = backendFieldError(error, 'price_annual')
+          if (fieldError) {
+            setError('price_annual', { type: 'server', message: fieldError })
+            return
+          }
+          setSubmitError(
+            backendFieldError(error, 'detail') ??
+              'No se pudo guardar el plan. Revisa los datos e intenta de nuevo.',
+          )
+        },
+      },
     )
   }
 
@@ -115,10 +168,14 @@ export function PlanEditModal({ plan, onClose }: Props) {
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
           {/* display_name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label
+              htmlFor="plan-display-name"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
               Nombre del plan
             </label>
             <input
+              id="plan-display-name"
               {...register('display_name')}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             />
@@ -129,10 +186,14 @@ export function PlanEditModal({ plan, onClose }: Props) {
 
           {/* description */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label
+              htmlFor="plan-description"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
               Descripción
             </label>
             <input
+              id="plan-description"
               {...register('description')}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             />
@@ -144,10 +205,14 @@ export function PlanEditModal({ plan, onClose }: Props) {
           {/* Prices */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label
+                htmlFor="plan-price-monthly"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
                 Precio mensual ($)
               </label>
               <input
+                id="plan-price-monthly"
                 type="number"
                 min={0}
                 {...register('price_monthly', { valueAsNumber: true })}
@@ -158,20 +223,46 @@ export function PlanEditModal({ plan, onClose }: Props) {
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label
+                htmlFor="plan-price-annual"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
                 Precio anual ($)
               </label>
               <input
+                id="plan-price-annual"
                 type="number"
                 min={0}
                 {...register('price_annual', { valueAsNumber: true })}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
-              {errors.price_annual && (
+              {errors.price_annual ? (
                 <p className="text-red-500 text-xs mt-1">{errors.price_annual.message}</p>
+              ) : (
+                // Traduce el número a lo que el cliente verá anunciado en el Hub.
+                <p className="text-xs mt-1" data-testid="annual-discount-hint">
+                  {discount !== null ? (
+                    <span className="text-green-600 dark:text-green-400">
+                      −{discount}% · el cliente ahorra ${annualSavings(priceMonthly, priceAnnual)}/año
+                    </span>
+                  ) : (
+                    <span className="text-gray-400">
+                      Sin descuento anual{priceMonthly > 0 && ` (12 meses = $${priceMonthly * MONTHS_PER_YEAR})`}
+                    </span>
+                  )}
+                </p>
               )}
             </div>
           </div>
+
+          {submitError && (
+            <div
+              role="alert"
+              className="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3 text-sm text-red-700 dark:text-red-300"
+            >
+              {submitError}
+            </div>
+          )}
 
           {/* popular */}
           <div className="flex items-center gap-2">
