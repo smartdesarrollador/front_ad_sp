@@ -10,6 +10,7 @@ const baseProof: YapeProof = {
   id: 'proof-1',
   screenshot_url: '',
   plan: 'starter',
+  billing_cycle: 'monthly',
   amount: '15.20',
   promo: {
     code: 'VERANO20',
@@ -72,5 +73,34 @@ describe('YapeProofsTable — desglose de cupón', () => {
     expect(screen.getByText('$19.00')).toBeInTheDocument()
     expect(screen.queryByText('VERANO20')).not.toBeInTheDocument()
     expect(document.querySelector('.line-through')).toBeNull()
+  })
+})
+
+describe('YapeProofsTable — ciclo de facturación', () => {
+  beforeEach(() => {
+    vi.mocked(useReviewYapeProof).mockReturnValue({
+      mutate: vi.fn(),
+      isPending: false,
+    } as unknown as ReturnType<typeof useReviewYapeProof>)
+  })
+
+  it('marca los comprobantes anuales y sufija el monto con /año', () => {
+    // Sin esto, quien revisa ve "$854" en un plan de $79/mes y no puede saber si es
+    // un pago anual legítimo o un importe anómalo — y aprobarlo concede 365 días.
+    renderTable([
+      { ...noPromoProof, plan: 'professional', billing_cycle: 'annual', amount: '854.00' },
+    ])
+
+    expect(screen.getByText('Anual')).toBeInTheDocument()
+    expect(screen.getByText('$854.00')).toBeInTheDocument()
+    expect(screen.getByText('/año')).toBeInTheDocument()
+  })
+
+  it('marca los mensuales como tales (el silencio era la ambigüedad)', () => {
+    renderTable([noPromoProof])
+
+    expect(screen.getByText('Mensual')).toBeInTheDocument()
+    expect(screen.getByText('/mes')).toBeInTheDocument()
+    expect(screen.queryByText('Anual')).not.toBeInTheDocument()
   })
 })

@@ -12,6 +12,11 @@ const PLAN_LABELS: Record<string, string> = {
   starter: 'Starter', professional: 'Professional', enterprise: 'Enterprise',
 }
 
+// El ciclo es lo que convierte "$854" en un importe esperable o en una anomalía, y lo
+// que decide si la aprobación concede 30 o 365 días. Se muestra siempre.
+const CYCLE_LABELS: Record<string, string> = { monthly: 'Mensual', annual: 'Anual' }
+const CYCLE_SUFFIX: Record<string, string> = { monthly: '/mes', annual: '/año' }
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('es-PE', {
     day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
@@ -101,12 +106,24 @@ export function YapeProofsTable({
                       <span className="text-sm text-gray-700 dark:text-gray-300">
                         {PLAN_LABELS[proof.plan] ?? proof.plan}
                       </span>
+                      <span
+                        className={`ml-1.5 px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                          proof.billing_cycle === 'annual'
+                            ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
+                            : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
+                        }`}
+                      >
+                        {CYCLE_LABELS[proof.billing_cycle] ?? proof.billing_cycle}
+                      </span>
                     </td>
 
                     {/* Monto */}
                     <td className="px-4 py-3">
                       <span className="text-sm font-mono text-gray-900 dark:text-white">
                         ${proof.amount}
+                      </span>
+                      <span className="text-xs text-gray-400 ml-0.5">
+                        {CYCLE_SUFFIX[proof.billing_cycle] ?? ''}
                       </span>
                       {proof.promo && (
                         <div className="flex items-center gap-1.5 mt-0.5">

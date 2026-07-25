@@ -16,10 +16,14 @@ export interface YapeProofPromo {
   final_amount: string
 }
 
+export type YapeBillingCycle = 'monthly' | 'annual'
+
 export interface YapeProof {
   id: string
   screenshot_url: string
   plan: string
+  /** Determina si el monto es de 1 mes o de 1 año, y cuántos días activa la aprobación. */
+  billing_cycle: YapeBillingCycle
   amount: string
   promo: YapeProofPromo | null
   status: YapeProofStatus

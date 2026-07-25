@@ -96,7 +96,22 @@ export function YapeProofModal({ proof, onClose }: Props) {
                 <Package className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Plan</p>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white capitalize">{proof.plan}</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white capitalize">
+                    {proof.plan}
+                    <span
+                      className={`ml-1.5 px-1.5 py-0.5 rounded text-[10px] font-medium normal-case ${
+                        proof.billing_cycle === 'annual'
+                          ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
+                          : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
+                      }`}
+                    >
+                      {proof.billing_cycle === 'annual' ? 'Anual' : 'Mensual'}
+                    </span>
+                  </p>
+                  {/* Lo que el clic de aprobar concede realmente. */}
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    Activa {proof.billing_cycle === 'annual' ? '365' : '30'} días
+                  </p>
                 </div>
               </div>
 
