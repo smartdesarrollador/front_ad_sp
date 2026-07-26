@@ -12,6 +12,8 @@ const baseProof: YapeProof = {
   plan: 'starter',
   billing_cycle: 'monthly',
   amount: '15.20',
+  exchange_rate: '3.7500',
+  amount_pen: '57.00',
   promo: {
     code: 'VERANO20',
     original_amount: '19.00',
@@ -102,5 +104,21 @@ describe('YapeProofsTable — ciclo de facturación', () => {
     expect(screen.getByText('Mensual')).toBeInTheDocument()
     expect(screen.getByText('/mes')).toBeInTheDocument()
     expect(screen.queryByText('Anual')).not.toBeInTheDocument()
+  })
+
+  it('muestra los soles transferidos con la tasa registrada en el pago', () => {
+    // El componente NO consulta la tasa vigente: si lo hiciera, este test no
+    // podría pasar sin montar el hook de moneda.
+    renderTable([{ ...noPromoProof, amount_pen: '746.25', exchange_rate: '3.7500' }])
+
+    expect(screen.getByText(/S\/ 746\.25/)).toBeInTheDocument()
+    expect(screen.getByText(/tasa 3\.7500/)).toBeInTheDocument()
+  })
+
+  it('avisa cuando el comprobante no trae conversión, en vez de inventarla', () => {
+    renderTable([{ ...noPromoProof, amount_pen: null, exchange_rate: null }])
+
+    expect(screen.getByText('Sin conversión registrada')).toBeInTheDocument()
+    expect(screen.queryByText(/S\//)).not.toBeInTheDocument()
   })
 })

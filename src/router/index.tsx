@@ -40,6 +40,11 @@ export const router = createBrowserRouter([
                   import('@/pages/PlansPage').then((m) => ({ Component: m.default })),
               },
               {
+                path: 'currency',
+                lazy: () =>
+                  import('@/pages/CurrencyPage').then((m) => ({ Component: m.default })),
+              },
+              {
                 path: 'reports',
                 lazy: () =>
                   import('@/pages/ReportsPage').then((m) => ({ Component: m.default })),

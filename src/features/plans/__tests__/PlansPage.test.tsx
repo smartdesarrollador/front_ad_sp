@@ -60,6 +60,16 @@ vi.mock('../hooks/useUpdatePlan', () => ({
   }),
 }))
 
+// Sin este mock el hook real saldría a la red: MSW está en onUnhandledRequest 'bypass'.
+vi.mock('@/features/currency/hooks/useCurrencyConfig', () => ({
+  useCurrencyConfig: () => ({
+    config: null,
+    usdToPen: 3.75,
+    isLoading: false,
+    isError: false,
+  }),
+}))
+
 vi.mock('@/hooks/usePermissions', () => ({
   usePermissions: () => ({
     hasPermission: () => true,
@@ -113,6 +123,18 @@ describe('PlansPage', () => {
     renderPage()
     expect(screen.getByText('$79')).toBeInTheDocument()
     expect(screen.getByText('$854/año')).toBeInTheDocument()
+  })
+
+  it('muestra la referencia en soles bajo el precio', () => {
+    renderPage()
+    // 79 × 3.75 = 296.25 → S/ 296 (los precios de catálogo van sin céntimos)
+    expect(screen.getByText('≈ S/ 296/mes')).toBeInTheDocument()
+  })
+
+  it('no muestra referencia en soles en un plan gratuito', () => {
+    renderPage()
+    // "≈ S/ 0/mes" no informa de nada.
+    expect(screen.queryByText('≈ S/ 0/mes')).not.toBeInTheDocument()
   })
 
   it('shows popular badge for professional', () => {

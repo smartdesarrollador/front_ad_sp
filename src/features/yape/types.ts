@@ -25,6 +25,13 @@ export interface YapeProof {
   /** Determina si el monto es de 1 mes o de 1 año, y cuántos días activa la aprobación. */
   billing_cycle: YapeBillingCycle
   amount: string
+  /**
+   * Testigo del cobro: tasa vigente e importe en soles al subir el comprobante.
+   * `null` en comprobantes anteriores al registro de tasa. NO recalcular con la
+   * tasa de hoy — es justo lo que hace irreconstruible un descuadre.
+   */
+  exchange_rate: string | null
+  amount_pen: string | null
   promo: YapeProofPromo | null
   status: YapeProofStatus
   tenant_name: string

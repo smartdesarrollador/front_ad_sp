@@ -30,14 +30,14 @@ const starter: AdminPlan = {
   updated_at: '2026-07-25T00:00:00Z',
 }
 
-function renderModal(plan: AdminPlan = starter) {
+function renderModal(plan: AdminPlan = starter, usdToPen: number | null = 3.75) {
   const onClose = vi.fn()
   const qc = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   })
   render(
     <QueryClientProvider client={qc}>
-      <PlanEditModal plan={plan} onClose={onClose} />
+      <PlanEditModal plan={plan} onClose={onClose} usdToPen={usdToPen} />
     </QueryClientProvider>,
   )
   return { onClose }
@@ -180,5 +180,30 @@ describe('PlanEditModal — errores del backend', () => {
     save()
 
     await waitFor(() => expect(onClose).toHaveBeenCalledOnce())
+  })
+})
+
+describe('PlanEditModal — referencia en soles', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('traduce el precio mensual al tipo de cambio vigente', () => {
+    renderModal()
+    // 19 × 3.75 = 71.25 → S/ 71
+    expect(screen.getByTestId('monthly-pen-hint')).toHaveTextContent('≈ S/ 71/mes')
+  })
+
+  it('se actualiza mientras se escribe el precio', async () => {
+    renderModal()
+    setPrice('Precio mensual ($)', '25')
+
+    // 25 × 3.75 = 93.75 → S/ 94
+    await waitFor(() =>
+      expect(screen.getByTestId('monthly-pen-hint')).toHaveTextContent('≈ S/ 94/mes'),
+    )
+  })
+
+  it('no inventa una referencia si no se conoce el tipo de cambio', () => {
+    renderModal(starter, null)
+    expect(screen.getByTestId('monthly-pen-hint')).toHaveTextContent('')
   })
 })

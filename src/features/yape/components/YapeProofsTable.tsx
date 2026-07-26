@@ -1,6 +1,32 @@
 import { CheckCircle, XCircle } from 'lucide-react'
+import { AMOUNT_DECIMALS, formatMoney } from '@/lib/currency'
 import type { YapeProof } from '../types'
+import { historicPen } from '../historic-pen'
 import { useReviewYapeProof } from '../hooks/useReviewYapeProof'
+
+/**
+ * Importe en soles registrado junto al comprobante. Usa la tasa guardada, nunca
+ * la vigente: mostrar la de hoy sobre un pago de la semana pasada es exactamente
+ * el descuadre que estos campos existen para eliminar.
+ */
+function PenAmount({ proof }: { proof: YapeProof }) {
+  const pen = historicPen(proof.amount_pen)
+
+  if (pen === null) {
+    return (
+      <div className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 italic">
+        Sin conversión registrada
+      </div>
+    )
+  }
+
+  return (
+    <div className="text-xs font-mono text-gray-500 dark:text-gray-400 mt-0.5">
+      {formatMoney(pen, 'PEN', AMOUNT_DECIMALS)}
+      <span className="text-gray-400 dark:text-gray-500"> · tasa {proof.exchange_rate}</span>
+    </div>
+  )
+}
 
 const STATUS_CONFIG = {
   pending:  { label: 'Pendiente',  classes: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' },
@@ -125,6 +151,10 @@ export function YapeProofsTable({
                       <span className="text-xs text-gray-400 ml-0.5">
                         {CYCLE_SUFFIX[proof.billing_cycle] ?? ''}
                       </span>
+                      {/* Lo que el cliente transfirió de verdad, con la tasa de ESE
+                          momento — no con la de hoy, que es lo que descuadraría
+                          contra el screenshot. */}
+                      <PenAmount proof={proof} />
                       {proof.promo && (
                         <div className="flex items-center gap-1.5 mt-0.5">
                           <span className="text-xs font-mono text-gray-400 line-through">

@@ -2,14 +2,19 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { Link } from 'react-router-dom'
 import { Check, Loader2 } from 'lucide-react'
+import { backendMessage } from '@/lib/apiErrors'
+import { useCurrencyConfig } from '@/features/currency/hooks/useCurrencyConfig'
 import { useYapeConfig } from '../hooks/useYapeConfig'
 import { useUpdateYapeConfig } from '../hooks/useUpdateYapeConfig'
 
+// `exchange_rate` NO está aquí a propósito: se gestiona en Moneda (/currency), que es su
+// fuente de verdad (CurrencyConfig). Dos campos editables del mismo número acaban
+// divergiendo. Al no estar en el formulario, tampoco viaja en el PATCH.
 const schema = z.object({
   phone:             z.string().min(1, 'Requerido'),
   holder_name:       z.string().min(1, 'Requerido'),
-  exchange_rate:     z.string().min(1, 'Requerido'),
   instructions_note: z.string(),
   is_enabled:        z.boolean(),
 })
@@ -18,14 +23,18 @@ type FormData = z.infer<typeof schema>
 
 export function YapeConfigForm() {
   const { config, isLoading } = useYapeConfig()
+  // Fuente de verdad del tipo de cambio; aquí solo se muestra.
+  const { config: currency } = useCurrencyConfig()
   const update = useUpdateYapeConfig()
   const [saved, setSaved] = useState(false)
+
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   const { register, handleSubmit, reset, watch, setValue, formState: { errors } } =
     useForm<FormData>({
       resolver: zodResolver(schema),
       defaultValues: {
-        phone: '', holder_name: '', exchange_rate: '3.75',
+        phone: '', holder_name: '',
         instructions_note: '', is_enabled: true,
       },
     })
@@ -35,7 +44,6 @@ export function YapeConfigForm() {
       reset({
         phone:             config.phone,
         holder_name:       config.holder_name,
-        exchange_rate:     config.exchange_rate,
         instructions_note: config.instructions_note,
         is_enabled:        config.is_enabled,
       })
@@ -46,10 +54,18 @@ export function YapeConfigForm() {
 
   function onSubmit(data: FormData) {
     setSaved(false)
+    setSubmitError(null)
     update.mutate(data, {
       onSuccess: () => {
         setSaved(true)
         setTimeout(() => setSaved(false), 3000)
+      },
+      // Sin esto, un guardado rechazado por el backend era MUDO: el botón giraba y
+      // nada más.
+      onError: (error) => {
+        setSubmitError(
+          backendMessage(error, 'No se pudo guardar la configuración. Intenta de nuevo.'),
+        )
       },
     })
   }
@@ -117,21 +133,24 @@ export function YapeConfigForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <span className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Tipo de cambio (PEN / USD)
-          </label>
-          <input
-            {...register('exchange_rate')}
-            type="number"
-            step="0.01"
-            min="1"
-            placeholder="3.75"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
-          />
-          <p className="text-xs text-gray-400 mt-1">Se usa para mostrar el monto aproximado en S/</p>
-          {errors.exchange_rate && (
-            <p className="text-red-500 text-xs mt-1">{errors.exchange_rate.message}</p>
-          )}
+          </span>
+          {/* Solo lectura, y leído de CurrencyConfig — no de config.exchange_rate, que es
+              la copia heredada de 2 decimales que aún sirve el endpoint de Yape. */}
+          <p className="px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm bg-gray-50 dark:bg-gray-900/40 text-gray-700 dark:text-gray-300">
+            {currency ? `${currency.usd_to_pen} soles por dólar` : '—'}
+          </p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+            Se usa para mostrar el monto aproximado en S/.{' '}
+            <Link
+              to="/currency"
+              className="text-primary-600 dark:text-primary-400 hover:underline"
+            >
+              Se edita en Moneda
+            </Link>
+            .
+          </p>
         </div>
       </div>
 
@@ -161,9 +180,9 @@ export function YapeConfigForm() {
             <Check className="w-4 h-4" /> Guardado
           </span>
         )}
-        {update.isError && (
-          <span className="text-red-500 text-sm">Error al guardar. Intenta de nuevo.</span>
-        )}
+        {/* Solo el error general: si el backend señaló un campo concreto, el mensaje
+            se pinta bajo ese campo y repetirlo aquí sería ruido. */}
+        {submitError && <span className="text-red-500 text-sm">{submitError}</span>}
       </div>
     </form>
   )

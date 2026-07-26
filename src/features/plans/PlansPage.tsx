@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Info } from 'lucide-react'
 import { usePermissions } from '@/hooks/usePermissions'
+import { useCurrencyConfig } from '@/features/currency/hooks/useCurrencyConfig'
 import { useAdminPlans } from './hooks/useAdminPlans'
 import { PlanCard } from './components/PlanCard'
 import { PlanEditModal } from './components/PlanEditModal'
@@ -26,6 +27,9 @@ function PlanCardSkeleton() {
 
 export default function PlansPage() {
   const { plans, isLoading } = useAdminPlans()
+  // Una sola lectura para las 4 cards y el modal: la tasa se pasa como prop, igual que
+  // canEdit, para que las cards sigan siendo presentacionales.
+  const { usdToPen } = useCurrencyConfig()
   const { hasPermission } = usePermissions()
   const [editingPlan, setEditingPlan] = useState<AdminPlan | null>(null)
 
@@ -60,6 +64,7 @@ export default function PlansPage() {
                 key={plan.id}
                 plan={plan}
                 canEdit={canEdit}
+                usdToPen={usdToPen}
                 onEdit={setEditingPlan}
               />
             ))}
@@ -68,6 +73,7 @@ export default function PlansPage() {
       {/* Edit Modal */}
       <PlanEditModal
         plan={editingPlan}
+        usdToPen={usdToPen}
         onClose={() => setEditingPlan(null)}
       />
     </div>

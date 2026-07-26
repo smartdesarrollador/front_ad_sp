@@ -20,6 +20,7 @@ import {
   Mail,
   Layers,
   Megaphone,
+  Coins,
   type LucideIcon,
 } from 'lucide-react'
 import { useUiStore } from '@/store/uiStore'
@@ -67,6 +68,7 @@ function Sidebar() {
       group: 'Administración',
       items: [
         { label: 'Planes', to: '/plans', icon: Package, permission: null },
+      { label: 'Moneda', to: '/currency', icon: Coins, permission: null },
         { label: 'Desktop App', to: '/releases', icon: MonitorDown, permission: null },
         { label: 'Licencias', to: '/licenses', icon: KeyRound, permission: null },
       ],

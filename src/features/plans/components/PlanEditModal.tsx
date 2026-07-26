@@ -3,6 +3,8 @@ import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { X, Plus, Loader2 } from 'lucide-react'
+import { backendFieldError } from '@/lib/apiErrors'
+import { formatUsdAsPen } from '@/lib/currency'
 import { useUpdatePlan } from '../hooks/useUpdatePlan'
 import {
   MONTHS_PER_YEAR,
@@ -56,15 +58,6 @@ const schema = baseSchema.superRefine((data, ctx) => {
 
 type FormData = z.infer<typeof baseSchema>
 
-/** Mensaje de error de un campo concreto en la respuesta 400 del backend. */
-function backendFieldError(error: unknown, field: string): string | null {
-  const data = (error as { response?: { data?: { error?: Record<string, unknown> } } })
-    .response?.data?.error
-  const detail = data?.[field]
-  if (Array.isArray(detail) && typeof detail[0] === 'string') return detail[0]
-  return typeof detail === 'string' ? detail : null
-}
-
 // `step` define la granularidad del input. Almacenamiento admite fracciones de GB
 // (0.25 GB = 256 MB); el resto de límites son enteros.
 const LIMIT_FIELDS: { name: keyof FormData['limits']; label: string; step?: number }[] = [
@@ -80,9 +73,11 @@ const LIMIT_FIELDS: { name: keyof FormData['limits']; label: string; step?: numb
 interface Props {
   plan: AdminPlan | null
   onClose: () => void
+  /** Tipo de cambio vigente, para la referencia en soles. `null` → no se muestra. */
+  usdToPen: number | null
 }
 
-export function PlanEditModal({ plan, onClose }: Props) {
+export function PlanEditModal({ plan, onClose, usdToPen }: Props) {
   const updatePlan = useUpdatePlan()
   const [submitError, setSubmitError] = useState<string | null>(null)
 
@@ -101,6 +96,8 @@ export function PlanEditModal({ plan, onClose }: Props) {
   const priceMonthly = watch('price_monthly')
   const priceAnnual = watch('price_annual')
   const discount = annualDiscountPercent(priceMonthly, priceAnnual)
+  // `watch` devuelve NaN con el input vacío; formatUsdAsPen lo neutraliza a null.
+  const penMonthly = formatUsdAsPen(priceMonthly, usdToPen)
 
   const { fields, append, remove } = useFieldArray({ control, name: 'highlights' })
 
@@ -218,8 +215,16 @@ export function PlanEditModal({ plan, onClose }: Props) {
                 {...register('price_monthly', { valueAsNumber: true })}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
-              {errors.price_monthly && (
+              {errors.price_monthly ? (
                 <p className="text-red-500 text-xs mt-1">{errors.price_monthly.message}</p>
+              ) : (
+                // Referencia en soles al tipo de cambio vigente; el cobro sigue en USD.
+                <p
+                  className="text-xs text-gray-400 dark:text-gray-500 mt-1"
+                  data-testid="monthly-pen-hint"
+                >
+                  {penMonthly ? `≈ ${penMonthly}/mes` : ''}
+                </p>
               )}
             </div>
             <div>

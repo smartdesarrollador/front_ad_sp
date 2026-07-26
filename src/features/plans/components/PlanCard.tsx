@@ -1,4 +1,5 @@
 import { Check, X, Pencil, Info } from 'lucide-react'
+import { formatUsdAsPen } from '@/lib/currency'
 import type { AdminPlan } from '../types'
 
 const ACCENT_COLORS: Record<string, string> = {
@@ -12,10 +13,14 @@ interface Props {
   plan: AdminPlan
   onEdit: (plan: AdminPlan) => void
   canEdit: boolean
+  /** Tipo de cambio vigente; `null` mientras no se conozca → no se muestra la referencia. */
+  usdToPen: number | null
 }
 
-export function PlanCard({ plan, onEdit, canEdit }: Props) {
+export function PlanCard({ plan, onEdit, canEdit, usdToPen }: Props) {
   const accent = ACCENT_COLORS[plan.id] ?? 'bg-gray-400'
+  // Free daría "≈ S/ 0/mes", que no informa de nada.
+  const penMonthly = plan.price_monthly > 0 ? formatUsdAsPen(plan.price_monthly, usdToPen) : null
 
   return (
     <div className="relative rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden">
@@ -60,6 +65,11 @@ export function PlanCard({ plan, onEdit, canEdit }: Props) {
           <p className="text-xs text-gray-400 dark:text-gray-500">
             ${plan.price_annual}/año
           </p>
+          {/* Referencia, no precio de venta: se cobra en USD. Va en su propio <p> para no
+              alterar el textContent de las dos líneas de arriba. */}
+          {penMonthly && (
+            <p className="text-xs text-gray-400 dark:text-gray-500">≈ {penMonthly}/mes</p>
+          )}
         </div>
 
         {/* Highlights */}

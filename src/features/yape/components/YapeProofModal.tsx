@@ -1,6 +1,8 @@
 import { useEffect } from 'react'
 import { X, CheckCircle, XCircle, User, Calendar, Package, DollarSign } from 'lucide-react'
+import { AMOUNT_DECIMALS, formatMoney } from '@/lib/currency'
 import type { YapeProof } from '../types'
+import { historicPen } from '../historic-pen'
 import { useReviewYapeProof } from '../hooks/useReviewYapeProof'
 
 const STATUS_CONFIG = {
@@ -22,6 +24,7 @@ interface Props {
 
 export function YapeProofModal({ proof, onClose }: Props) {
   const review = useReviewYapeProof()
+  const pen = historicPen(proof?.amount_pen ?? null)
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -119,8 +122,35 @@ export function YapeProofModal({ proof, onClose }: Props) {
                 <DollarSign className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Monto</p>
-                  {proof.promo ? (
-                    <div className="text-sm font-mono space-y-0.5">
+
+                  {/* Los soles van primero: es el número que aparece en el
+                      screenshot que el revisor tiene delante. El dólar queda como
+                      referencia de lo que se cobra. */}
+                  {pen !== null ? (
+                    <>
+                      <p className="text-lg font-semibold font-mono text-gray-900 dark:text-white">
+                        {formatMoney(pen, 'PEN', AMOUNT_DECIMALS)}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        ${proof.amount} USD · tasa {proof.exchange_rate} al momento del pago
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-sm font-medium font-mono text-gray-900 dark:text-white">
+                        ${proof.amount} USD
+                      </p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 italic">
+                        Sin conversión registrada — comprobante anterior al registro de tasa
+                      </p>
+                    </>
+                  )}
+
+                  {/* El desglose del cupón se queda en USD: es la aritmética del
+                      descuento, y lo que se compara contra el comprobante es el
+                      total en soles de arriba. */}
+                  {proof.promo && (
+                    <div className="text-sm font-mono space-y-0.5 mt-1.5">
                       <p className="text-gray-500 dark:text-gray-400">
                         Plan: ${proof.promo.original_amount}
                       </p>
@@ -131,8 +161,6 @@ export function YapeProofModal({ proof, onClose }: Props) {
                         Total: ${proof.promo.final_amount} USD
                       </p>
                     </div>
-                  ) : (
-                    <p className="text-sm font-medium font-mono text-gray-900 dark:text-white">${proof.amount} USD</p>
                   )}
                 </div>
               </div>
