@@ -1,8 +1,11 @@
-import { useEffect } from 'react'
-import { X, CheckCircle, XCircle, User, Calendar, Package, DollarSign } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import {
+  X, Check, CheckCircle, XCircle, User, Calendar, Copy, Hash, Package, DollarSign,
+} from 'lucide-react'
 import { AMOUNT_DECIMALS, formatMoney } from '@/lib/currency'
 import type { YapeProof } from '../types'
 import { historicPen } from '../historic-pen'
+import { methodClasses, methodLabel } from '../payment-method-labels'
 import { useReviewYapeProof } from '../hooks/useReviewYapeProof'
 
 const STATUS_CONFIG = {
@@ -15,6 +18,48 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('es-PE', {
     day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
   })
+}
+
+/**
+ * Referencia de la transacción, copiable de un clic. Es el dato con el que el revisor
+ * busca el pago en el panel de PayPal, así que teclearlo a mano —20 caracteres
+ * alfanuméricos— sería justo donde se cuela el error.
+ */
+function TransactionReference({ reference }: { reference: string }) {
+  const [copied, setCopied] = useState(false)
+
+  function copy() {
+    navigator.clipboard?.writeText(reference).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
+
+  return (
+    <div className="flex items-start gap-2.5">
+      <Hash className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+      <div className="min-w-0">
+        <p className="text-xs text-gray-500 dark:text-gray-400">Referencia de transacción</p>
+        <div className="flex items-center gap-1.5">
+          <p className="text-sm font-mono text-gray-900 dark:text-white break-all">{reference}</p>
+          <button
+            type="button"
+            onClick={copy}
+            title="Copiar referencia"
+            aria-label="Copiar referencia"
+            className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex-shrink-0"
+          >
+            {copied
+              ? <Check className="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
+              : <Copy className="w-3.5 h-3.5 text-gray-400" />}
+          </button>
+        </div>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+          Búscala en tu panel del método para confirmar el pago
+        </p>
+      </div>
+    </div>
+  )
 }
 
 interface Props {
@@ -57,7 +102,7 @@ export function YapeProofModal({ proof, onClose }: Props) {
           {proof.screenshot_url ? (
             <img
               src={proof.screenshot_url}
-              alt="Comprobante Yape"
+              alt="Comprobante de pago"
               className="max-h-[80vh] max-w-full object-contain"
             />
           ) : (
@@ -80,10 +125,18 @@ export function YapeProofModal({ proof, onClose }: Props) {
 
           {/* Details */}
           <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
-            {/* Status badge */}
-            <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${sc.classes}`}>
-              {sc.label}
-            </span>
+            {/* Estado y método: lo primero que sitúa al revisor —dónde verificar el
+                pago— antes de mirar la imagen. */}
+            <div className="flex items-center gap-2">
+              <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${sc.classes}`}>
+                {sc.label}
+              </span>
+              <span
+                className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${methodClasses(proof.method)}`}
+              >
+                {methodLabel(proof.method)}
+              </span>
+            </div>
 
             <div className="space-y-3">
               <div className="flex items-start gap-2.5">
@@ -140,8 +193,12 @@ export function YapeProofModal({ proof, onClose }: Props) {
                       <p className="text-sm font-medium font-mono text-gray-900 dark:text-white">
                         ${proof.amount} USD
                       </p>
+                      {/* Los dos casos llegan con `amount_pen` a null, pero significan
+                          cosas distintas: explicarlos igual desorienta al revisor. */}
                       <p className="text-xs text-gray-400 dark:text-gray-500 italic">
-                        Sin conversión registrada — comprobante anterior al registro de tasa
+                        {proof.charge_currency === 'USD'
+                          ? 'El cliente pagó en dólares — no hay conversión que registrar'
+                          : 'Sin conversión registrada — comprobante anterior al registro de tasa'}
                       </p>
                     </>
                   )}
@@ -164,6 +221,11 @@ export function YapeProofModal({ proof, onClose }: Props) {
                   )}
                 </div>
               </div>
+
+              {/* Solo cuando el método la da: en Yape la captura es la única evidencia. */}
+              {proof.transaction_reference && (
+                <TransactionReference reference={proof.transaction_reference} />
+              )}
 
               <div className="flex items-start gap-2.5">
                 <Calendar className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />

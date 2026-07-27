@@ -2,6 +2,7 @@ import { CheckCircle, XCircle } from 'lucide-react'
 import { AMOUNT_DECIMALS, formatMoney } from '@/lib/currency'
 import type { YapeProof } from '../types'
 import { historicPen } from '../historic-pen'
+import { methodClasses, methodLabel } from '../payment-method-labels'
 import { useReviewYapeProof } from '../hooks/useReviewYapeProof'
 
 /**
@@ -13,9 +14,11 @@ function PenAmount({ proof }: { proof: YapeProof }) {
   const pen = historicPen(proof.amount_pen)
 
   if (pen === null) {
+    // Un pago en dólares no tiene conversión que registrar, y decir «sin conversión»
+    // a secas insinúa que falta un dato.
     return (
       <div className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 italic">
-        Sin conversión registrada
+        {proof.charge_currency === 'USD' ? 'Pagado en dólares' : 'Sin conversión registrada'}
       </div>
     )
   }
@@ -71,7 +74,7 @@ export function YapeProofsTable({
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead className="bg-gray-50 dark:bg-gray-800">
             <tr>
-              {['Comprobante', 'Cliente', 'Plan', 'Monto', 'Estado', 'Fecha', 'Acciones'].map((h) => (
+              {['Comprobante', 'Cliente', 'Método', 'Plan', 'Monto', 'Estado', 'Fecha', 'Acciones'].map((h) => (
                 <th
                   key={h}
                   className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
@@ -87,6 +90,7 @@ export function YapeProofsTable({
                 <tr key={i} className="animate-pulse">
                   <td className="px-4 py-3"><div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-lg" /></td>
                   <td className="px-4 py-3"><div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded" /></td>
+                  <td className="px-4 py-3"><div className="h-5 w-16 bg-gray-200 dark:bg-gray-700 rounded-full" /></td>
                   <td className="px-4 py-3"><div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded" /></td>
                   <td className="px-4 py-3"><div className="h-4 w-12 bg-gray-200 dark:bg-gray-700 rounded" /></td>
                   <td className="px-4 py-3"><div className="h-5 w-20 bg-gray-200 dark:bg-gray-700 rounded-full" /></td>
@@ -96,7 +100,7 @@ export function YapeProofsTable({
               ))
             ) : proofs.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-10 text-center text-sm text-gray-400 dark:text-gray-500">
+                <td colSpan={8} className="px-4 py-10 text-center text-sm text-gray-400 dark:text-gray-500">
                   No hay comprobantes que mostrar
                 </td>
               </tr>
@@ -125,6 +129,15 @@ export function YapeProofsTable({
                     <td className="px-4 py-3">
                       <p className="text-sm font-medium text-gray-900 dark:text-white">{proof.tenant_name}</p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">{proof.tenant_email}</p>
+                    </td>
+
+                    {/* Método — con qué pagó, que decide dónde se verifica el pago */}
+                    <td className="px-4 py-3">
+                      <span
+                        className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${methodClasses(proof.method)}`}
+                      >
+                        {methodLabel(proof.method)}
+                      </span>
                     </td>
 
                     {/* Plan */}

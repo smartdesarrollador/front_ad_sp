@@ -8,6 +8,9 @@ vi.mock('../hooks/useReviewYapeProof')
 
 const baseProof: YapeProof = {
   id: 'proof-1',
+  method: 'yape',
+  charge_currency: 'PEN',
+  transaction_reference: '',
   screenshot_url: '',
   plan: 'starter',
   billing_cycle: 'monthly',
@@ -120,5 +123,45 @@ describe('YapeProofsTable — ciclo de facturación', () => {
 
     expect(screen.getByText('Sin conversión registrada')).toBeInTheDocument()
     expect(screen.queryByText(/S\//)).not.toBeInTheDocument()
+  })
+})
+
+describe('YapeProofsTable — método de pago', () => {
+  beforeEach(() => {
+    vi.mocked(useReviewYapeProof).mockReturnValue({
+      mutate: vi.fn(),
+      isPending: false,
+    } as unknown as ReturnType<typeof useReviewYapeProof>)
+  })
+
+  it('muestra el método de cada comprobante', () => {
+    renderTable([noPromoProof])
+
+    expect(screen.getByText('Yape')).toBeInTheDocument()
+  })
+
+  it('distingue un pago de PayPal de uno de Yape en la misma cola', () => {
+    // La cola es única para todos los métodos: sin esta columna, el revisor no sabría
+    // en qué panel buscar el pago que tiene delante.
+    renderTable([
+      noPromoProof,
+      {
+        ...noPromoProof, id: 'proof-3', method: 'paypal', charge_currency: 'USD',
+        transaction_reference: '8XY12345AB',
+      },
+    ])
+
+    expect(screen.getByText('Yape')).toBeInTheDocument()
+    expect(screen.getByText('PayPal')).toBeInTheDocument()
+  })
+
+  it('un pago en dólares no se explica como si le faltara la tasa', () => {
+    // Los dos casos llegan con `amount_pen` a null y significan cosas distintas.
+    renderTable([
+      { ...noPromoProof, method: 'paypal', charge_currency: 'USD', amount_pen: null, exchange_rate: null },
+    ])
+
+    expect(screen.getByText('Pagado en dólares')).toBeInTheDocument()
+    expect(screen.queryByText('Sin conversión registrada')).not.toBeInTheDocument()
   })
 })

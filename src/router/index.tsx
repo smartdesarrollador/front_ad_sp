@@ -85,9 +85,9 @@ export const router = createBrowserRouter([
                   import('@/pages/LicensesPage').then((m) => ({ Component: m.default })),
               },
               {
-                path: 'yape',
+                path: 'payments',
                 lazy: () =>
-                  import('@/pages/YapePage').then((m) => ({ Component: m.default })),
+                  import('@/pages/PaymentsPage').then((m) => ({ Component: m.default })),
               },
               {
                 path: 'knowledge-base',

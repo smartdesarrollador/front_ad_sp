@@ -1,28 +1,44 @@
 import { useState } from 'react'
-import { Smartphone, Clock, CheckCircle, XCircle, List } from 'lucide-react'
-import { YapeConfigForm } from './components/YapeConfigForm'
+import { Wallet, Clock, CheckCircle, XCircle, List, Lock } from 'lucide-react'
+import { usePermissions } from '@/hooks/usePermissions'
+import { PaymentMethodCard } from './components/PaymentMethodCard'
 import { YapeProofFilters, EMPTY_FILTERS } from './components/YapeProofFilters'
 import { YapeProofsTable } from './components/YapeProofsTable'
 import { YapeProofModal } from './components/YapeProofModal'
+import { usePaymentMethods } from './hooks/usePaymentMethods'
 import { useYapeProofs } from './hooks/useYapeProofs'
 import type { YapeProof, YapeProofFilters as FiltersType } from './types'
 
-type Tab = 'config' | 'proofs'
+type Tab = 'proofs' | 'methods'
 
+// «Comprobantes» va primero y es la pestaña por defecto: revisar pagos es el trabajo
+// diario, mientras que la configuración de un método se toca cada varios meses.
 const TABS: { id: Tab; label: string }[] = [
-  { id: 'config', label: 'Configuración' },
-  { id: 'proofs', label: 'Comprobantes' },
+  { id: 'proofs',  label: 'Comprobantes' },
+  { id: 'methods', label: 'Métodos de pago' },
 ]
 
-export default function YapePage() {
-  const [activeTab, setActiveTab]     = useState<Tab>('config')
-  const [filters, setFilters]         = useState<FiltersType>(EMPTY_FILTERS)
-  const [page, setPage]               = useState(1)
-  const [selectedProof, setSelected]  = useState<YapeProof | null>(null)
+/**
+ * Sección «Pagos»: una sola cola de comprobantes para todos los métodos —lo que el
+ * revisor necesita saber es cuántos pagos esperan, vengan de donde vengan— y una
+ * tarjeta de configuración por método.
+ *
+ * El fichero conserva el nombre «yape» hasta que se retire esa superficie heredada
+ * (modelo, rutas y carpeta) en un cambio de renombrado puro.
+ */
+export default function PaymentsPage() {
+  const [activeTab, setActiveTab]    = useState<Tab>('proofs')
+  const [filters, setFilters]        = useState<FiltersType>(EMPTY_FILTERS)
+  const [page, setPage]              = useState(1)
+  const [selectedProof, setSelected] = useState<YapeProof | null>(null)
+
+  const { hasPermission } = usePermissions()
+  const canManage = hasPermission('subscriptions.manage')
 
   const { proofs, kpi, pagination, isLoading } = useYapeProofs({
     ...filters, page, per_page: 5,
   })
+  const { methods, isLoading: methodsLoading } = usePaymentMethods()
 
   function handleFilterChange(f: FiltersType) {
     setFilters(f)
@@ -34,12 +50,12 @@ export default function YapePage() {
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-          <Smartphone className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+          <Wallet className="w-5 h-5 text-purple-600 dark:text-purple-400" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Pagos Yape</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Pagos</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Configura el método de pago y gestiona los comprobantes de clientes
+            Revisa los comprobantes de tus clientes y configura los métodos de pago
           </p>
         </div>
       </div>
@@ -67,22 +83,6 @@ export default function YapePage() {
           ))}
         </nav>
       </div>
-
-      {/* Config tab */}
-      {activeTab === 'config' && (
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-5">
-          <div>
-            <h2 className="text-base font-semibold text-gray-900 dark:text-white">
-              Datos de la cuenta Yape
-            </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Estos datos se muestran al cliente en el paso de pago durante el registro.
-              Los cambios son inmediatos — no requieren redeploy.
-            </p>
-          </div>
-          <YapeConfigForm />
-        </div>
-      )}
 
       {/* Proofs tab */}
       {activeTab === 'proofs' && (
@@ -124,6 +124,47 @@ export default function YapePage() {
               onThumbnailClick={setSelected}
             />
           </div>
+        </div>
+      )}
+
+      {/* Methods tab */}
+      {activeTab === 'methods' && (
+        <div className="space-y-5">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Estos datos se muestran al cliente en el paso de pago. Los cambios son
+            inmediatos — no requieren redeploy.
+          </p>
+
+          {!canManage && (
+            <div className="flex items-start gap-3 p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+              <Lock className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Necesitas el permiso <code>subscriptions.manage</code> para editar los métodos
+                de pago.
+              </p>
+            </div>
+          )}
+
+          {methodsLoading ? (
+            [...Array(2)].map((_, i) => (
+              <div
+                key={i}
+                className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 space-y-4 animate-pulse"
+              >
+                <div className="h-5 w-32 bg-gray-200 dark:bg-gray-700 rounded" />
+                <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+                <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+              </div>
+            ))
+          ) : methods.length === 0 ? (
+            <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-10 text-center text-sm text-gray-400 dark:text-gray-500">
+              No hay métodos de pago configurables
+            </div>
+          ) : (
+            methods.map((method) => (
+              <PaymentMethodCard key={method.method} config={method} canManage={canManage} />
+            ))
+          )}
         </div>
       )}
 
