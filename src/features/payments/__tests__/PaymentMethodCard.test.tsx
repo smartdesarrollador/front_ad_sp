@@ -23,7 +23,7 @@ vi.mock('@/features/currency/hooks/useCurrencyConfig', () => ({
   }),
 }))
 
-const yapeConfig: PaymentMethodConfig = {
+const YAPE: PaymentMethodConfig = {
   method: 'yape',
   display_name: 'Yape',
   is_enabled: true,
@@ -37,7 +37,7 @@ const yapeConfig: PaymentMethodConfig = {
   updated_at: '2026-07-25T00:00:00Z',
 }
 
-const paypalConfig: PaymentMethodConfig = {
+const PAYPAL: PaymentMethodConfig = {
   method: 'paypal',
   display_name: 'PayPal',
   is_enabled: false,
@@ -72,7 +72,7 @@ describe('PaymentMethodCard', () => {
   })
 
   it('pinta los campos de Yape y ninguno de PayPal', () => {
-    renderCard(yapeConfig)
+    renderCard(YAPE)
 
     expect(screen.getByLabelText('Número Yape')).toHaveValue('955365043')
     expect(screen.getByLabelText('Titular de la cuenta')).toBeInTheDocument()
@@ -81,7 +81,7 @@ describe('PaymentMethodCard', () => {
   })
 
   it('pinta los campos de PayPal y ninguno de Yape', () => {
-    renderCard(paypalConfig)
+    renderCard(PAYPAL)
 
     expect(screen.getByLabelText('Enlace de pago')).toBeInTheDocument()
     expect(screen.getByLabelText('Correo de la cuenta')).toBeInTheDocument()
@@ -89,7 +89,7 @@ describe('PaymentMethodCard', () => {
   })
 
   it('avisa cuando falta el dato de destino del pago', () => {
-    renderCard(paypalConfig)
+    renderCard(PAYPAL)
     expect(screen.getByText('Falta el dato de destino del pago')).toBeInTheDocument()
   })
 
@@ -97,7 +97,7 @@ describe('PaymentMethodCard', () => {
     // Un PATCH con todo el formulario pisaría con '' campos que este método ni
     // siquiera muestra.
     const user = userEvent.setup()
-    renderCard(paypalConfig)
+    renderCard(PAYPAL)
 
     await user.type(screen.getByLabelText('Enlace de pago'), 'https://paypal.me/acme')
     await user.click(screen.getByRole('button', { name: 'Guardar cambios' }))
@@ -120,7 +120,7 @@ describe('PaymentMethodCard', () => {
     })
 
     const user = userEvent.setup()
-    renderCard(paypalConfig)
+    renderCard(PAYPAL)
 
     await user.click(screen.getByRole('switch'))
     await user.click(screen.getByRole('button', { name: 'Guardar cambios' }))
@@ -129,7 +129,7 @@ describe('PaymentMethodCard', () => {
   })
 
   it('sin permiso, los campos quedan deshabilitados y no hay botón de guardar', () => {
-    renderCard(yapeConfig, false)
+    renderCard(YAPE, false)
 
     expect(screen.getByLabelText('Número Yape')).toBeDisabled()
     expect(screen.getByRole('switch')).toBeDisabled()
@@ -138,7 +138,7 @@ describe('PaymentMethodCard', () => {
 
   it('muestra el tipo de cambio en solo lectura, con enlace a Moneda', () => {
     // La tasa se edita en /currency: dos campos editables del mismo número divergen.
-    renderCard(yapeConfig)
+    renderCard(YAPE)
 
     expect(screen.getByText('3.7500 soles por dólar')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Se edita en Moneda' })).toHaveAttribute(

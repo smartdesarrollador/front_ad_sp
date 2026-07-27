@@ -3,10 +3,10 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createMemoryRouter, RouterProvider } from 'react-router-dom'
-import PaymentsPage from '../YapePage'
-import type { PaymentMethodConfig, YapeProof } from '../types'
+import PaymentsPage from '../PaymentsPage'
+import type { PaymentMethodConfig, PaymentProof } from '../types'
 
-const proof: YapeProof = {
+const proof: PaymentProof = {
   id: 'proof-1',
   method: 'paypal',
   charge_currency: 'USD',
@@ -41,11 +41,11 @@ const methods: PaymentMethodConfig[] = [
 ]
 
 const state = vi.hoisted(() => ({
-  useYapeProofs: vi.fn(),
+  usePaymentProofs: vi.fn(),
 }))
 
-vi.mock('../hooks/useYapeProofs', () => ({
-  useYapeProofs: (args: unknown) => state.useYapeProofs(args),
+vi.mock('../hooks/usePaymentProofs', () => ({
+  usePaymentProofs: (args: unknown) => state.usePaymentProofs(args),
 }))
 
 vi.mock('../hooks/usePaymentMethods', () => ({
@@ -56,8 +56,8 @@ vi.mock('../hooks/useUpdatePaymentMethod', () => ({
   useUpdatePaymentMethod: () => ({ mutate: vi.fn(), isPending: false }),
 }))
 
-vi.mock('../hooks/useReviewYapeProof', () => ({
-  useReviewYapeProof: () => ({ mutate: vi.fn(), isPending: false }),
+vi.mock('../hooks/useReviewProof', () => ({
+  useReviewProof: () => ({ mutate: vi.fn(), isPending: false }),
 }))
 
 vi.mock('@/features/currency/hooks/useCurrencyConfig', () => ({
@@ -96,7 +96,7 @@ function renderPage() {
 describe('PaymentsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    state.useYapeProofs.mockReturnValue({
+    state.usePaymentProofs.mockReturnValue({
       proofs: [proof],
       kpi: { total: 1, pending: 1, approved: 0, rejected: 0 },
       pagination: { page: 1, per_page: 5, total: 1, total_pages: 1 },
@@ -126,7 +126,7 @@ describe('PaymentsPage', () => {
 
     await user.selectOptions(screen.getByLabelText('Método'), 'paypal')
 
-    expect(state.useYapeProofs).toHaveBeenLastCalledWith(
+    expect(state.usePaymentProofs).toHaveBeenLastCalledWith(
       expect.objectContaining({ method: 'paypal', page: 1 }),
     )
   })

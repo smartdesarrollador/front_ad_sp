@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { YapeProofsTable } from '../components/YapeProofsTable'
-import { useReviewYapeProof } from '../hooks/useReviewYapeProof'
-import type { YapeProof } from '../types'
+import { ProofsTable } from '../components/ProofsTable'
+import { useReviewProof } from '../hooks/useReviewProof'
+import type { PaymentProof } from '../types'
 
-vi.mock('../hooks/useReviewYapeProof')
+vi.mock('../hooks/useReviewProof')
 
-const baseProof: YapeProof = {
+const baseProof: PaymentProof = {
   id: 'proof-1',
   method: 'yape',
   charge_currency: 'PEN',
@@ -31,7 +31,7 @@ const baseProof: YapeProof = {
   reviewed_at: null,
 }
 
-const noPromoProof: YapeProof = {
+const noPromoProof: PaymentProof = {
   ...baseProof,
   id: 'proof-2',
   amount: '19.00',
@@ -40,9 +40,9 @@ const noPromoProof: YapeProof = {
   tenant_email: 'owner@beta.com',
 }
 
-function renderTable(proofs: YapeProof[]) {
+function renderTable(proofs: PaymentProof[]) {
   return render(
-    <YapeProofsTable
+    <ProofsTable
       proofs={proofs}
       isLoading={false}
       page={1}
@@ -55,12 +55,12 @@ function renderTable(proofs: YapeProof[]) {
   )
 }
 
-describe('YapeProofsTable — desglose de cupón', () => {
+describe('ProofsTable — desglose de cupón', () => {
   beforeEach(() => {
-    vi.mocked(useReviewYapeProof).mockReturnValue({
+    vi.mocked(useReviewProof).mockReturnValue({
       mutate: vi.fn(),
       isPending: false,
-    } as unknown as ReturnType<typeof useReviewYapeProof>)
+    } as unknown as ReturnType<typeof useReviewProof>)
   })
 
   it('muestra código del cupón y precio original tachado cuando hay promo', () => {
@@ -81,12 +81,12 @@ describe('YapeProofsTable — desglose de cupón', () => {
   })
 })
 
-describe('YapeProofsTable — ciclo de facturación', () => {
+describe('ProofsTable — ciclo de facturación', () => {
   beforeEach(() => {
-    vi.mocked(useReviewYapeProof).mockReturnValue({
+    vi.mocked(useReviewProof).mockReturnValue({
       mutate: vi.fn(),
       isPending: false,
-    } as unknown as ReturnType<typeof useReviewYapeProof>)
+    } as unknown as ReturnType<typeof useReviewProof>)
   })
 
   it('marca los comprobantes anuales y sufija el monto con /año', () => {
@@ -126,12 +126,12 @@ describe('YapeProofsTable — ciclo de facturación', () => {
   })
 })
 
-describe('YapeProofsTable — método de pago', () => {
+describe('ProofsTable — método de pago', () => {
   beforeEach(() => {
-    vi.mocked(useReviewYapeProof).mockReturnValue({
+    vi.mocked(useReviewProof).mockReturnValue({
       mutate: vi.fn(),
       isPending: false,
-    } as unknown as ReturnType<typeof useReviewYapeProof>)
+    } as unknown as ReturnType<typeof useReviewProof>)
   })
 
   it('muestra el método de cada comprobante', () => {

@@ -1,7 +1,7 @@
 import { METHOD_LABELS } from '../payment-method-labels'
-import type { YapeProofFilters } from '../types'
+import type { ProofFilters } from '../types'
 
-export const EMPTY_FILTERS: YapeProofFilters = {
+export const EMPTY_FILTERS: ProofFilters = {
   status: '', plan: '', method: '', date_from: '', date_to: '',
 }
 
@@ -25,11 +25,11 @@ const PLAN_OPTIONS = [
 ]
 
 interface Props {
-  filters: YapeProofFilters
-  onChange: (f: YapeProofFilters) => void
+  filters: ProofFilters
+  onChange: (f: ProofFilters) => void
 }
 
-export function YapeProofFilters({ filters, onChange }: Props) {
+export function ProofFilters({ filters, onChange }: Props) {
   const isActive = Object.values(filters).some(Boolean)
 
   return (

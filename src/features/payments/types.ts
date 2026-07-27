@@ -1,12 +1,3 @@
-export interface YapeConfig {
-  phone: string
-  holder_name: string
-  is_enabled: boolean
-  exchange_rate: string
-  instructions_note: string
-  updated_at: string | null
-}
-
 export type PaymentMethod = 'yape' | 'paypal'
 
 /**
@@ -45,18 +36,18 @@ export type PaymentMethodConfigUpdate = Partial<
   >
 >
 
-export type YapeProofStatus = 'pending' | 'approved' | 'rejected'
+export type ProofStatus = 'pending' | 'approved' | 'rejected'
 
-export interface YapeProofPromo {
+export interface ProofPromo {
   code: string
   original_amount: string
   discount_amount: string
   final_amount: string
 }
 
-export type YapeBillingCycle = 'monthly' | 'annual'
+export type ProofBillingCycle = 'monthly' | 'annual'
 
-export interface YapeProof {
+export interface PaymentProof {
   id: string
   method: PaymentMethod
   /**
@@ -72,7 +63,7 @@ export interface YapeProof {
   screenshot_url: string
   plan: string
   /** Determina si el monto es de 1 mes o de 1 año, y cuántos días activa la aprobación. */
-  billing_cycle: YapeBillingCycle
+  billing_cycle: ProofBillingCycle
   amount: string
   /**
    * Testigo del cobro: tasa vigente e importe en soles al subir el comprobante.
@@ -81,8 +72,8 @@ export interface YapeProof {
    */
   exchange_rate: string | null
   amount_pen: string | null
-  promo: YapeProofPromo | null
-  status: YapeProofStatus
+  promo: ProofPromo | null
+  status: ProofStatus
   tenant_name: string
   tenant_email: string
   tenant_slug: string
@@ -90,16 +81,16 @@ export interface YapeProof {
   reviewed_at: string | null
 }
 
-export interface YapeProofsKpi {
+export interface ProofsKpi {
   total: number
   pending: number
   approved: number
   rejected: number
 }
 
-export interface YapeProofsResponse {
-  proofs: YapeProof[]
-  kpi: YapeProofsKpi
+export interface ProofsResponse {
+  proofs: PaymentProof[]
+  kpi: ProofsKpi
   pagination: {
     page: number
     per_page: number
@@ -108,7 +99,7 @@ export interface YapeProofsResponse {
   }
 }
 
-export interface YapeProofFilters {
+export interface ProofFilters {
   status: string
   plan: string
   method: string

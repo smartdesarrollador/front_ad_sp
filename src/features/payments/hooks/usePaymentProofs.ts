@@ -1,13 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api'
-import type { YapeProofFilters, YapeProofsResponse } from '../types'
+import type { ProofFilters, ProofsResponse } from '../types'
 
-export function useYapeProofs(filters: YapeProofFilters & { page: number; per_page: number }) {
+export function usePaymentProofs(filters: ProofFilters & { page: number; per_page: number }) {
   const { data, isLoading } = useQuery({
-    queryKey: ['yape-proofs', filters],
+    queryKey: ['payment-proofs', filters],
     queryFn: () =>
       apiClient
-        .get<YapeProofsResponse>('/admin/yape/proofs/', { params: filters })
+        .get<ProofsResponse>('/admin/payments/proofs/', { params: filters })
         .then((r) => r.data),
     staleTime: 30_000,
   })

@@ -1,16 +1,16 @@
 import { CheckCircle, XCircle } from 'lucide-react'
 import { AMOUNT_DECIMALS, formatMoney } from '@/lib/currency'
-import type { YapeProof } from '../types'
+import type { PaymentProof } from '../types'
 import { historicPen } from '../historic-pen'
 import { methodClasses, methodLabel } from '../payment-method-labels'
-import { useReviewYapeProof } from '../hooks/useReviewYapeProof'
+import { useReviewProof } from '../hooks/useReviewProof'
 
 /**
  * Importe en soles registrado junto al comprobante. Usa la tasa guardada, nunca
  * la vigente: mostrar la de hoy sobre un pago de la semana pasada es exactamente
  * el descuadre que estos campos existen para eliminar.
  */
-function PenAmount({ proof }: { proof: YapeProof }) {
+function PenAmount({ proof }: { proof: PaymentProof }) {
   const pen = historicPen(proof.amount_pen)
 
   if (pen === null) {
@@ -53,20 +53,20 @@ function formatDate(iso: string) {
 }
 
 interface Props {
-  proofs: YapeProof[]
+  proofs: PaymentProof[]
   isLoading: boolean
   page: number
   totalPages: number
   total: number
   perPage: number
   onPageChange: (p: number) => void
-  onThumbnailClick: (proof: YapeProof) => void
+  onThumbnailClick: (proof: PaymentProof) => void
 }
 
-export function YapeProofsTable({
+export function ProofsTable({
   proofs, isLoading, page, totalPages, total, perPage, onPageChange, onThumbnailClick,
 }: Props) {
-  const review = useReviewYapeProof()
+  const review = useReviewProof()
 
   return (
     <div className="space-y-3">

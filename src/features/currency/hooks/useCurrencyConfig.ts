@@ -6,7 +6,7 @@ import type { CurrencyConfig } from '../types'
 /**
  * Configuración de moneda de la plataforma.
  *
- * La queryKey es compartida a propósito con Gestión de Planes y con Pagos Yape:
+ * La queryKey es compartida a propósito con Gestión de Planes y con Pagos:
  * TanStack deduplica el GET y una sola invalidación tras guardar refresca las
  * tres superficies. Duplicar el hook daría dos cachés y dejaría la referencia en
  * soles de Planes mostrando la tasa vieja.

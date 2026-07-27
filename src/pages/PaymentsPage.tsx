@@ -1,1 +1,1 @@
-export { default } from '@/features/yape/YapePage'
+export { default } from '@/features/payments/PaymentsPage'

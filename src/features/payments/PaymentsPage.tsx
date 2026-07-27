@@ -2,12 +2,12 @@ import { useState } from 'react'
 import { Wallet, Clock, CheckCircle, XCircle, List, Lock } from 'lucide-react'
 import { usePermissions } from '@/hooks/usePermissions'
 import { PaymentMethodCard } from './components/PaymentMethodCard'
-import { YapeProofFilters, EMPTY_FILTERS } from './components/YapeProofFilters'
-import { YapeProofsTable } from './components/YapeProofsTable'
-import { YapeProofModal } from './components/YapeProofModal'
+import { ProofFilters, EMPTY_FILTERS } from './components/ProofFilters'
+import { ProofsTable } from './components/ProofsTable'
+import { ProofModal } from './components/ProofModal'
 import { usePaymentMethods } from './hooks/usePaymentMethods'
-import { useYapeProofs } from './hooks/useYapeProofs'
-import type { YapeProof, YapeProofFilters as FiltersType } from './types'
+import { usePaymentProofs } from './hooks/usePaymentProofs'
+import type { PaymentProof, ProofFilters as FiltersType } from './types'
 
 type Tab = 'proofs' | 'methods'
 
@@ -22,20 +22,17 @@ const TABS: { id: Tab; label: string }[] = [
  * Sección «Pagos»: una sola cola de comprobantes para todos los métodos —lo que el
  * revisor necesita saber es cuántos pagos esperan, vengan de donde vengan— y una
  * tarjeta de configuración por método.
- *
- * El fichero conserva el nombre «yape» hasta que se retire esa superficie heredada
- * (modelo, rutas y carpeta) en un cambio de renombrado puro.
  */
 export default function PaymentsPage() {
   const [activeTab, setActiveTab]    = useState<Tab>('proofs')
   const [filters, setFilters]        = useState<FiltersType>(EMPTY_FILTERS)
   const [page, setPage]              = useState(1)
-  const [selectedProof, setSelected] = useState<YapeProof | null>(null)
+  const [selectedProof, setSelected] = useState<PaymentProof | null>(null)
 
   const { hasPermission } = usePermissions()
   const canManage = hasPermission('subscriptions.manage')
 
-  const { proofs, kpi, pagination, isLoading } = useYapeProofs({
+  const { proofs, kpi, pagination, isLoading } = usePaymentProofs({
     ...filters, page, per_page: 5,
   })
   const { methods, isLoading: methodsLoading } = usePaymentMethods()
@@ -112,8 +109,8 @@ export default function PaymentsPage() {
 
           {/* Filters + Table */}
           <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 space-y-4">
-            <YapeProofFilters filters={filters} onChange={handleFilterChange} />
-            <YapeProofsTable
+            <ProofFilters filters={filters} onChange={handleFilterChange} />
+            <ProofsTable
               proofs={proofs}
               isLoading={isLoading}
               page={page}
@@ -169,7 +166,7 @@ export default function PaymentsPage() {
       )}
 
       {/* Modal */}
-      <YapeProofModal proof={selectedProof} onClose={() => setSelected(null)} />
+      <ProofModal proof={selectedProof} onClose={() => setSelected(null)} />
     </div>
   )
 }

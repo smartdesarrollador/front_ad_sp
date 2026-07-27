@@ -3,10 +3,10 @@ import {
   X, Check, CheckCircle, XCircle, User, Calendar, Copy, Hash, Package, DollarSign,
 } from 'lucide-react'
 import { AMOUNT_DECIMALS, formatMoney } from '@/lib/currency'
-import type { YapeProof } from '../types'
+import type { PaymentProof } from '../types'
 import { historicPen } from '../historic-pen'
 import { methodClasses, methodLabel } from '../payment-method-labels'
-import { useReviewYapeProof } from '../hooks/useReviewYapeProof'
+import { useReviewProof } from '../hooks/useReviewProof'
 
 const STATUS_CONFIG = {
   pending:  { label: 'Pendiente',  classes: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' },
@@ -63,12 +63,12 @@ function TransactionReference({ reference }: { reference: string }) {
 }
 
 interface Props {
-  proof: YapeProof | null
+  proof: PaymentProof | null
   onClose: () => void
 }
 
-export function YapeProofModal({ proof, onClose }: Props) {
-  const review = useReviewYapeProof()
+export function ProofModal({ proof, onClose }: Props) {
+  const review = useReviewProof()
   const pen = historicPen(proof?.amount_pen ?? null)
 
   useEffect(() => {
